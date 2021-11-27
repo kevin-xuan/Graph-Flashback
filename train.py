@@ -74,7 +74,8 @@ for e in range(setting.epochs):  # 100
 
         optimizer.zero_grad()
         loss = trainer.loss(x, t, s, y, y_t, y_s, h, active_users)
-        loss.backward(retain_graph=True)
+#         loss.backward(retain_graph=True)
+        loss.backward()
         losses.append(loss.item())
         optimizer.step()
 

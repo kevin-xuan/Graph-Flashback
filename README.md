@@ -1,7 +1,7 @@
 # new_Flashback_code
 
 # Requirements
-* torch
+* torch 1.10
 
 * numpy
 

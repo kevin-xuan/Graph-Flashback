@@ -1,13 +1,14 @@
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-
+import time
+import pickle
 from setting import Setting
 from trainer import FlashbackTrainer
 from dataloader import PoiDataloader
 from dataset import Split
-# from network import create_h0_strategy
-from users_network import create_h0_strategy
+from utils import *
+from network import create_h0_strategy
 from evaluation import Evaluation
 from tqdm import tqdm
 
@@ -16,16 +17,26 @@ Main train script to invoke from commandline.
 '''
 
 # parse settings
+
+
 setting = Setting()
 setting.parse()
+log = open(setting.log_file, 'w')
+# log_string(log, setting)
+
 print(setting)
 
 # load dataset
 poi_loader = PoiDataloader(setting.max_users, setting.min_checkins)  # 0， 5*20+1
 poi_loader.read(setting.dataset_file)
-print('Active POI number: ', poi_loader.locations())  # 18737
-print('Active User number: ', poi_loader.user_count())  # 32510
-print('Total Checkins number: ', poi_loader.checkins_count())  # 1278274
+# print('Active POI number: ', poi_loader.locations())  # 18737 106994
+# print('Active User number: ', poi_loader.user_count())  # 32510 7768
+# print('Total Checkins number: ', poi_loader.checkins_count())  # 1278274
+
+log_string(log, 'Active POI number:{}'.format(poi_loader.locations()))
+log_string(log, 'Active User number:{}'.format(poi_loader.user_count()))
+log_string(log, 'Total Checkins number:{}'.format(poi_loader.checkins_count()))
+
 dataset = poi_loader.create_dataset(setting.sequence_length, setting.batch_size, Split.TRAIN)  # 20, 200 or 1024, 0
 dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 dataset_test = poi_loader.create_dataset(setting.sequence_length, setting.batch_size, Split.TEST)
@@ -33,11 +44,22 @@ dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False)
 assert setting.batch_size < poi_loader.user_count(), 'batch size must be lower than the amount of available users'
 
 # create flashback trainer
-trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s)  # 0.01, 100 or 1000
+with open('KGE/scheme1_transr_20.pkl', 'rb') as f:
+    transition_graph = pickle.load(f)  # 在cpu上
+transition_graph = top_transition_graph(transition_graph)
+
+with open('KGE/scheme1_transh_user_20.pkl', 'rb') as f:
+    friend_graph = pickle.load(f)  # 在cpu上
+friend_graph = top_transition_graph(friend_graph)
+
+# print('已经归一化转移矩阵')
+log_string(log, '已经归一化转移矩阵')
+
+trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, transition_graph, friend_graph)  # 0.01, 100 or 1000
 h0_strategy = create_h0_strategy(setting.hidden_dim, setting.is_lstm)  # 10 True or False
 trainer.prepare(poi_loader.locations(), poi_loader.user_count(), setting.hidden_dim, setting.rnn_factory,
                 setting.device)
-evaluation_test = Evaluation(dataset_test, dataloader_test, poi_loader.user_count(), h0_strategy, trainer, setting)
+evaluation_test = Evaluation(dataset_test, dataloader_test, poi_loader.user_count(), h0_strategy, trainer, setting, log)
 print('{} {}'.format(trainer, setting.rnn_factory))
 
 #  training loop
@@ -53,7 +75,7 @@ for e in range(setting.epochs):  # 100
 
     losses = []
 
-    for i, (x, t, s, y, y_t, y_s, reset_h, active_users) in enumerate(dataloader):
+    for i, (x, t, t_slot, s, y, y_t, y_t_slot, y_s, reset_h, active_users) in enumerate(dataloader):
         # reset hidden states for newly added users
         for j, reset in enumerate(reset_h):
             if reset:
@@ -66,15 +88,27 @@ for e in range(setting.epochs):  # 100
 
         x = x.squeeze().to(setting.device)
         t = t.squeeze().to(setting.device)
+        t_slot = t_slot.squeeze().to(setting.device)
         s = s.squeeze().to(setting.device)
+
         y = y.squeeze().to(setting.device)
         y_t = y_t.squeeze().to(setting.device)
+        y_t_slot = y_t_slot.squeeze().to(setting.device)
         y_s = y_s.squeeze().to(setting.device)
         active_users = active_users.to(setting.device)
 
         optimizer.zero_grad()
-        loss = trainer.loss(x, t, s, y, y_t, y_s, h, active_users)
+        forward_start = time.time()
+        loss = trainer.loss(x, t, t_slot, s, y, y_t, y_t_slot, y_s, h, active_users)
+
+        # print('One forward: ', time.time() - forward_start)
+
+        start = time.time()
         loss.backward(retain_graph=True)
+
+        torch.nn.utils.clip_grad_norm_(trainer.parameters(), 5)
+        end = time.time()
+        # print('反向传播需要{}s'.format(end - start))
         losses.append(loss.item())
         optimizer.step()
 
@@ -84,11 +118,18 @@ for e in range(setting.epochs):  # 100
     # statistics:
     if (e + 1) % 1 == 0:
         epoch_loss = np.mean(losses)
-        print(f'Epoch: {e + 1}/{setting.epochs}')
-        print(f'Used learning rate: {scheduler.get_lr()[0]}')
-        print(f'Avg Loss: {epoch_loss}')
-    if (e + 1) % setting.validate_epoch == 0:
-        print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
-        evaluation_test.evaluate()
+        # print(f'Epoch: {e + 1}/{setting.epochs}')
+        # print(f'Used learning rate: {scheduler.get_last_lr()[0]}')
+        # print(f'Avg Loss: {epoch_loss}')
+        log_string(log, f'Epoch: {e + 1}/{setting.epochs}')
+        log_string(log, f'Used learning rate: {scheduler.get_last_lr()[0]}')
+        log_string(log, f'Avg Loss: {epoch_loss}')
 
+    if (e + 1) % setting.validate_epoch == 0 and (e + 1) >= 25:  # 第25轮效果最好, 直接评估这一轮
+        log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
+        # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
+        evl_start = time.time()
+        evaluation_test.evaluate()
+        evl_end = time.time()
+        print('评估需要{:.2f}'.format(evl_end - evl_start))
 bar.close()

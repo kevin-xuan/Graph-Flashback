@@ -2,8 +2,7 @@ import torch
 import argparse
 import sys
 
-# from network import RnnFactory
-from users_network import RnnFactory
+from network import RnnFactory
 
 
 class Setting:
@@ -12,17 +11,12 @@ class Setting:
 
     def parse(self):
         self.guess_foursquare = any(['4sq' in argv for argv in sys.argv])  # foursquare has different default args.
-        parser = argparse.ArgumentParser()
 
+        parser = argparse.ArgumentParser()
         if self.guess_foursquare:
             self.parse_foursquare(parser)
         else:
             self.parse_gowalla(parser)
-
-        # if not self.guess_foursquare:
-        #     self.parse_foursquare(parser)
-        # else:
-        #     self.parse_gowalla(parser)
         self.parse_arguments(parser)
         args = parser.parse_args()
 
@@ -50,6 +44,9 @@ class Setting:
         self.validate_epoch = args.validate_epoch  # 每5轮验证一次
         self.report_user = args.report_user  # -1
 
+        # log
+        self.log_file = args.log_file
+
         ### CUDA Setup ###
         self.device = torch.device('cpu') if args.gpu == -1 else torch.device('cuda', args.gpu)
 
@@ -65,8 +62,6 @@ class Setting:
         # data management
         parser.add_argument('--dataset', default='checkins-gowalla.txt', type=str,
                             help='the dataset under ./data/<dataset.txt> to load')
-        # parser.add_argument('--dataset', default='checkins-4sq.txt', type=str,
-        #                     help='the dataset under ./data/<dataset.txt> to load')
         parser.add_argument('--friendship', default='gowalla_friend.txt', type=str,
                             help='the friendship file under ../data/<edges.txt> to load')
         # evaluation        
@@ -75,16 +70,20 @@ class Setting:
         parser.add_argument('--report-user', default=-1, type=int,
                             help='report every x user on evaluation (-1: ignore)')
 
+        # log
+        parser.add_argument('--log_file', default='./data/log_', type=str,
+                            help='存储结果日志')
+
     def parse_gowalla(self, parser):
         # defaults for gowalla dataset
-        parser.add_argument('--batch-size', default=200, type=int,  # 200
+        parser.add_argument('--batch-size', default=100, type=int,  # 200
                             help='amount of users to process in one pass (batching)')
         parser.add_argument('--lambda_t', default=0.1, type=float, help='decay factor for temporal data')
         parser.add_argument('--lambda_s', default=1000, type=float, help='decay factor for spatial data')
 
     def parse_foursquare(self, parser):
         # defaults for foursquare dataset
-        parser.add_argument('--batch-size', default=512, type=int,  # 1024
+        parser.add_argument('--batch-size', default=1024, type=int,
                             help='amount of users to process in one pass (batching)')
         parser.add_argument('--lambda_t', default=0.1, type=float, help='decay factor for temporal data')
         parser.add_argument('--lambda_s', default=100, type=float, help='decay factor for spatial data')
@@ -93,6 +92,3 @@ class Setting:
         return (
                    'parse with foursquare default settings' if self.guess_foursquare else 'parse with gowalla default settings') + '\n' \
                + 'use device: {}'.format(self.device)
-        # return (
-        #            'parse with foursquare default settings' if not self.guess_foursquare else 'parse with gowalla default settings') + '\n' \
-        #        + 'use device: {}'.format(self.device)

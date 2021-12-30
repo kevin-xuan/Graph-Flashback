@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from utils import log_string
 
 
 class Evaluation:
@@ -17,13 +18,14 @@ class Evaluation:
     Using the --report_user argument one can access the statistics per user.
     """
 
-    def __init__(self, dataset, dataloader, user_count, h0_strategy, trainer, setting):
+    def __init__(self, dataset, dataloader, user_count, h0_strategy, trainer, setting, log):
         self.dataset = dataset
         self.dataloader = dataloader
         self.user_count = user_count
         self.h0_strategy = h0_strategy
         self.trainer = trainer
         self.setting = setting
+        self._log = log
 
     def evaluate(self):
         self.dataset.reset()
@@ -43,7 +45,7 @@ class Evaluation:
             u_average_precision = np.zeros(self.user_count)
             reset_count = torch.zeros(self.user_count)
 
-            for i, (x, t, s, y, y_t, y_s, reset_h, active_users) in enumerate(self.dataloader):
+            for i, (x, t, t_slot, s, y, y_t, y_t_slot, y_s, reset_h, active_users) in enumerate(self.dataloader):
                 active_users = active_users.squeeze()
                 for j, reset in enumerate(reset_h):
                     if reset:
@@ -58,15 +60,17 @@ class Evaluation:
                 # squeeze for reasons of "loader-batch-size-is-1"
                 x = x.squeeze().to(self.setting.device)
                 t = t.squeeze().to(self.setting.device)
+                t_slot = t_slot.squeeze().to(self.setting.device)
                 s = s.squeeze().to(self.setting.device)
+
                 y = y.squeeze()
                 y_t = y_t.squeeze().to(self.setting.device)
+                y_t_slot = y_t_slot.squeeze().to(self.setting.device)
                 y_s = y_s.squeeze().to(self.setting.device)
-
                 active_users = active_users.to(self.setting.device)
 
                 # evaluate:
-                out, h = self.trainer.evaluate(x, t, s, y_t, y_s, h, active_users)
+                out, h = self.trainer.evaluate(x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_users)
 
                 for j in range(self.setting.batch_size):
                     # o contains a per user list of votes for all locations for each sequence entry
@@ -115,8 +119,14 @@ class Evaluation:
                           formatter.format(u_recall1[j] / u_iter_cnt[j]), 'MAP',
                           formatter.format(u_average_precision[j] / u_iter_cnt[j]), sep='\t')
 
-            print('recall@1:', formatter.format(recall1 / iter_cnt))
-            print('recall@5:', formatter.format(recall5 / iter_cnt))
-            print('recall@10:', formatter.format(recall10 / iter_cnt))
-            print('MAP', formatter.format(average_precision / iter_cnt))
+            # print('recall@1:', formatter.format(recall1 / iter_cnt))
+            # print('recall@5:', formatter.format(recall5 / iter_cnt))
+            # print('recall@10:', formatter.format(recall10 / iter_cnt))
+            # print('MAP', formatter.format(average_precision / iter_cnt))
+            # print('predictions:', iter_cnt)
+
+            log_string(self._log, 'recall@1: ' + formatter.format(recall1 / iter_cnt))
+            log_string(self._log, 'recall@5: ' + formatter.format(recall5 / iter_cnt))
+            log_string(self._log, 'recall@10: ' + formatter.format(recall10 / iter_cnt))
+            log_string(self._log, 'MAP: ' + formatter.format(average_precision / iter_cnt))
             print('predictions:', iter_cnt)

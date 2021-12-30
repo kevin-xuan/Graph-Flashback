@@ -30,12 +30,14 @@ class PoiDataloader():
 
         self.users = []
         self.times = []  # 二重列表,每个元素是active user所对应POIs的访问timestamp,按时间顺序排序
+        self.time_slots = []
         self.coords = []  # 二重列表,每个元素是active user所对应POIs的GPS坐标,按时间顺序排序
         self.locs = []  # 二重列表,每个元素是active user所对应POIs,按时间顺序排序
 
     def create_dataset(self, sequence_length, batch_size, split, usage=Usage.MAX_SEQ_LENGTH, custom_seq_count=1):
         return PoiDataset(self.users.copy(),
                           self.times.copy(),
+                          self.time_slots.copy(),
                           self.coords.copy(),
                           self.locs.copy(),
                           sequence_length,
@@ -96,6 +98,7 @@ class PoiDataloader():
         user_time = []
         user_coord = []
         user_loc = []
+        user_time_slot = []
 
         prev_user = int(lines[0].split('\t')[0])
         prev_user = self.user2id.get(prev_user)  # from 0
@@ -108,6 +111,8 @@ class PoiDataloader():
 
             time = (datetime.strptime(tokens[1], "%Y-%m-%dT%H:%M:%SZ") - datetime(1970, 1,
                                                                                   1)).total_seconds()  # unix seconds
+            # 自己加的time slot, 将一周的时间分成24 * 7个时间槽
+            time_slot = (datetime.strptime(tokens[1], "%Y-%m-%dT%H:%M:%SZ")).weekday() * 24 + (datetime.strptime(tokens[1], "%Y-%m-%dT%H:%M:%SZ")).hour
             lat = float(tokens[2])
             long = float(tokens[3])
             coord = (lat, long)
@@ -121,22 +126,26 @@ class PoiDataloader():
             if user == prev_user:
                 # Because the check-ins for every user is sorted in descending chronological order in the file
                 user_time.insert(0, time)  # insert in front!
+                user_time_slot.insert(0, time_slot)
                 user_coord.insert(0, coord)
                 user_loc.insert(0, location)
             else:
                 self.users.append(prev_user)  # 添加用户
                 self.times.append(user_time)  # 添加列表
+                self.time_slots.append(user_time_slot)
                 self.coords.append(user_coord)
                 self.locs.append(user_loc)
-
+                # print(len(user_time) == len(user_time_slot) == len(user_loc) == len(user_coord))
                 # restart:
                 prev_user = user
                 user_time = [time]
+                user_time_slot = [time_slot]
                 user_coord = [coord]
                 user_loc = [location]
 
         # process also the latest user in the for loop
         self.users.append(prev_user)
         self.times.append(user_time)
+        self.time_slots.append(user_time_slot)
         self.coords.append(user_coord)
         self.locs.append(user_loc)

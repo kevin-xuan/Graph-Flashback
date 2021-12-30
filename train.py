@@ -28,10 +28,10 @@ print(setting)
 
 log_string(log, setting.trans_user_file)
 log_string(log, setting.trans_loc_file)
-log_string(log, setting.use_weight)
-log_string(log, setting.lambda_user)
-log_string(log, setting.lambda_loc)
-log_string(log, setting.use_graph_user)
+log_string(log, 'AXW: ' + str(setting.use_weight))
+log_string(log, str(setting.lambda_user))
+log_string(log, str(setting.lambda_loc))
+log_string(log, 'GCN in user: ' + str(setting.use_graph_user))
 
 # load dataset
 poi_loader = PoiDataloader(setting.max_users, setting.min_checkins)  # 0， 5*20+1

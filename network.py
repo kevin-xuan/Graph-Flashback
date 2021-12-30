@@ -84,7 +84,8 @@ class Flashback(nn.Module):
     of user embeddings to the output of a generic RNN unit (RNN, GRU, LSTM).
     """
 
-    def __init__(self, input_size, user_count, hidden_size, f_t, f_s, rnn_factory, lambda_loc, lambda_user, use_weight, graph, friend_graph, use_graph_user):
+    def __init__(self, input_size, user_count, hidden_size, f_t, f_s, rnn_factory, lambda_loc, lambda_user, use_weight,
+                 graph, friend_graph, use_graph_user):
         super().__init__()
         self.input_size = input_size  # POI个数
         self.user_count = user_count
@@ -115,6 +116,7 @@ class Flashback(nn.Module):
 
     def forward(self, x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_user):
         # 用GCN处理转移graph, 即用顶点i的邻居顶点j来更新i所对应的POI embedding
+        seq_len, user_len = x.size()
 
         I = identity(self.graph.shape[0], format='coo')
         graph = (self.graph * self.lambda_loc + I)  # r * A + I  # sparse matrix
@@ -139,7 +141,7 @@ class Flashback(nn.Module):
             friend_graph = (self.friend_graph * self.lambda_user + I_f)
             friend_graph = calculate_random_walk_matrix(friend_graph)
             friend_graph = sparse_matrix_to_tensor(friend_graph).to(x.device)
-             # AX
+            # AX
             user_emb = self.user_encoder(torch.LongTensor(list(range(self.user_count))).to(x.device))
             user_encoder_weight = torch.sparse.mm(graph, user_emb).to(x.device)  # (user_count, hidden_size)
 
@@ -149,9 +151,6 @@ class Flashback(nn.Module):
         else:
             p_u = self.user_encoder(active_user)  # (1, user_len, hidden_size)
             p_u = p_u.view(user_len, self.hidden_size)  # (user_len, hidden_size)
-
-        
-        seq_len, user_len = x.size()
 
         new_x_emb = []
         for i in range(seq_len):

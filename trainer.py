@@ -13,13 +13,18 @@ class FlashbackTrainer():
     Performs loss computation and prediction.
     """
 
-    def __init__(self, lambda_t, lambda_s, transition_graph, friend_graph):
+    def __init__(self, lambda_t, lambda_s, lambda_loc, lambda_user, use_weight, transition_graph, friend_graph, use_graph_user):
         """ The hyper parameters to control spatial and temporal decay.
         """
         self.lambda_t = lambda_t
         self.lambda_s = lambda_s
+
+        self.lambda_loc = lambda_loc
+        self.lambda_user = lambda_user
+        self.use_weight = use_weight
         self.graph = transition_graph
         self.friend_graph = friend_graph
+        self.use_graph_user = use_graph_user
 
     def __str__(self):
         return 'Use flashback training.'
@@ -33,7 +38,7 @@ class FlashbackTrainer():
         f_s = lambda delta_s, user_len: torch.exp(-(delta_s * self.lambda_s))  # exp decay  2个functions
         self.loc_count = loc_count
         self.cross_entropy_loss = nn.CrossEntropyLoss()
-        self.model = Flashback(loc_count, user_count, hidden_size, f_t, f_s, gru_factory, self.graph, self.friend_graph).to(device)
+        self.model = Flashback(loc_count, user_count, hidden_size, f_t, f_s, gru_factory, self.lambda_loc,  self.lambda_user, self.use_weight, self.graph, self.friend_graph, self.use_graph_user).to(device)
 
     def evaluate(self, x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_users):
         """ takes a batch (users x location sequence)

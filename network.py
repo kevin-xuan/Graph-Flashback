@@ -84,15 +84,20 @@ class Flashback(nn.Module):
     of user embeddings to the output of a generic RNN unit (RNN, GRU, LSTM).
     """
 
-    def __init__(self, input_size, user_count, hidden_size, f_t, f_s, rnn_factory, graph, friend_graph):
+    def __init__(self, input_size, user_count, hidden_size, f_t, f_s, rnn_factory, lambda_loc, lambda_user, use_weight, graph, friend_graph, use_graph_user):
         super().__init__()
         self.input_size = input_size  # POI个数
         self.user_count = user_count
         self.hidden_size = hidden_size
         self.f_t = f_t  # function for computing temporal weight
         self.f_s = f_s  # function for computing spatial weight
+
+        self.lambda_loc = lambda_loc
+        self.lambda_user = lambda_user
+        self.use_weight = use_weight
         self.graph = graph
         self.friend_graph = friend_graph
+        self.use_graph_user = use_graph_user
 
         self.encoder = nn.Embedding(input_size, hidden_size)  # location embedding
         self.temp_encoder = nn.Embedding(input_size, hidden_size)
@@ -101,62 +106,51 @@ class Flashback(nn.Module):
         self.pref_encoder = nn.Embedding(1, hidden_size * 2)
         self.project_matrix = nn.Linear(hidden_size, hidden_size * 2)  # 将user和location投影到同一片子空间
 
-        # 学习单位矩阵的自适应系数 r * I
-        # self.identity_weight = torch.FloatTensor(input_size, 1)
-        # nn.init.uniform_(self.identity_weight)
-
         # GCN里使用的AXW中的权重矩阵W从这两个随便选一个试试
         # self._gconv_params = LayerParams(self, 'gconv')
-        # self.gconv_weight = nn.Linear(hidden_size, hidden_size)
+        self.gconv_weight = nn.Linear(hidden_size, hidden_size)
 
         self.rnn = rnn_factory.create(hidden_size)  # 改了这里！！！
         self.fc = nn.Linear(2 * hidden_size, input_size)  # create outputs in length of locations
 
     def forward(self, x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_user):
         # 用GCN处理转移graph, 即用顶点i的邻居顶点j来更新i所对应的POI embedding
-        # graph = coo_matrix(self.graph)
-        # I = coo_matrix(identity(graph.shape[0]))
 
         I = identity(self.graph.shape[0], format='coo')
-        # I_f = identity(self.friend_graph.shape[0], format='coo')
-        # graph = sparse_matrix_to_tensor(self.graph)  # (loc_count, loc_count)
-        # I = sparse_matrix_to_tensor(identity(graph.shape[0]))  # sparse tensor
-
-        # 构造自适应的单位矩阵
-        # I = torch.sparse.mm(I, self.identity_weight.cpu())  # dense tensor
-        # I = sp.diags(np.array(I).flatten())  # sparse dia_matrix 稀疏对角矩阵
-        # I = sparse_matrix_to_tensor(I).to(x.device)  # sparse tensor
-
-        graph = (self.graph + I)  # A + r * I  # sparse matrix
-        # friend_graph = (self.friend_graph + I_f)
-        # graph_t = calculate_reverse_random_walk_matrix(graph)
+        graph = (self.graph * self.lambda_loc + I)  # r * A + I  # sparse matrix
         graph = calculate_random_walk_matrix(graph)
-        # friend_graph = calculate_random_walk_matrix(friend_graph)
-
         graph = sparse_matrix_to_tensor(graph).to(x.device)  # sparse tensor gpu
-        # friend_graph = sparse_matrix_to_tensor(friend_graph).to(x.device)
-        # graph_t = sparse_matrix_to_tensor(graph_t)
-
         # AX
         loc_emb = self.encoder(torch.LongTensor(list(range(self.input_size))).to(x.device))
         encoder_weight = torch.sparse.mm(graph, loc_emb).to(x.device)  # (input_size, hidden_size)
 
-        # user_emb = self.user_encoder(torch.LongTensor(list(range(self.user_count))).to(x.device))
-        # user_encoder_weight = torch.sparse.mm(friend_graph, user_emb).to(x.device)  # (user_count, hidden_size)
-        # encoder_weight = (encoder_weight + torch.sparse.mm(graph_t, loc_emb).to(x.device)) / 2  # (A X + A^-1 X) / 2
+        if self.use_weight:
+            # AXW
+            # weights = self._gconv_params.get_weights((self.hidden_size, self.hidden_size))
+            # biases = self._gconv_params.get_biases(self.hidden_size, 1.0)
+            # encoder_weight = torch.matmul(encoder_weight, weights)  # (input_size, hidden_size)
+            # encoder_weight += biases
+            # 或者
+            encoder_weight = self.gconv_weight(encoder_weight)
 
-        # AXW
-        # weights = self._gconv_params.get_weights((self.hidden_size, self.hidden_size))
-        # biases = self._gconv_params.get_biases(self.hidden_size, 1.0)
-        # encoder_weight = torch.matmul(encoder_weight, weights)  # (input_size, hidden_size)
-        # encoder_weight += biases
-        # 或者
-        # encoder_weight = self.gconv_weight(encoder_weight)
+        # 是否用GCN来更新user embedding
+        if self.use_graph_user:
+            I_f = identity(self.friend_graph.shape[0], format='coo')
+            friend_graph = (self.friend_graph * self.lambda_user + I_f)
+            friend_graph = calculate_random_walk_matrix(friend_graph)
+            friend_graph = sparse_matrix_to_tensor(friend_graph).to(x.device)
+             # AX
+            user_emb = self.user_encoder(torch.LongTensor(list(range(self.user_count))).to(x.device))
+            user_encoder_weight = torch.sparse.mm(graph, user_emb).to(x.device)  # (user_count, hidden_size)
 
-        # self.encoder.weight = nn.Parameter(encoder_weight)
-        # self.temp_encoder.weight = nn.Parameter(encoder_weight)  # !!!!!!!
+            if self.use_weight:
+                user_encoder_weight = self.gconv_weight(user_encoder_weight)
+            p_u = torch.index_select(user_encoder_weight, 0, active_user.squeeze())
+        else:
+            p_u = self.user_encoder(active_user)  # (1, user_len, hidden_size)
+            p_u = p_u.view(user_len, self.hidden_size)  # (user_len, hidden_size)
 
-        # temp_loc_encoder = nn.Embedding.from_pretrained(encoder_weight)  # 临时的location embedding
+        
         seq_len, user_len = x.size()
 
         new_x_emb = []
@@ -165,21 +159,12 @@ class Flashback(nn.Module):
 
         x_emb = torch.stack(new_x_emb, dim=0)
 
-        # x_emb = temp_loc_encoder(x)
-        # x_emb = self.encoder(x)  # (seq_len, user_len, hidden_size)
-        # x_emb = self.temp_encoder(x)  # (seq_len, user_len, hidden_size)
-
         # x_time_emb = self.time_encoder(t_slot)
         # new_x_emb = torch.cat([x_emb, x_time_emb], dim=-1)  # (seq_len, user_len, hidden_size * 2)
         # out, h = self.rnn(new_x_emb, h)  # (seq_len, user_len, hidden_size)
 
         out, h = self.rnn(x_emb, h)  # (seq_len, user_len, hidden_size)
-        # print('h', h.size())  # (1, user_len, hidden_size)
         out_w = torch.zeros(seq_len, user_len, self.hidden_size, device=x.device)
-
-        # p_u = torch.index_select(user_encoder_weight, 0, active_user.squeeze())
-        p_u = self.user_encoder(active_user)  # (1, user_len, hidden_size)
-        p_u = p_u.view(user_len, self.hidden_size)  # (user_len, hidden_size)
 
         p_proj_u = torch.tanh(self.project_matrix(p_u))  # (user_len, hidden_size * 2)
         x_proj_emb = torch.tanh(self.project_matrix(x_emb)).permute(1, 0, 2)  # (user_len, seq_len, hidden_size * 2)

@@ -26,6 +26,13 @@ log = open(setting.log_file, 'w')
 
 print(setting)
 
+log_string(log, setting.trans_user_file)
+log_string(log, setting.trans_loc_file)
+log_string(log, setting.use_weight)
+log_string(log, setting.lambda_user)
+log_string(log, setting.lambda_loc)
+log_string(log, setting.use_graph_user)
+
 # load dataset
 poi_loader = PoiDataloader(setting.max_users, setting.min_checkins)  # 0， 5*20+1
 poi_loader.read(setting.dataset_file)
@@ -44,18 +51,20 @@ dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False)
 assert setting.batch_size < poi_loader.user_count(), 'batch size must be lower than the amount of available users'
 
 # create flashback trainer
-with open('KGE/scheme1_transr_20.pkl', 'rb') as f:
+# with open('KGE/scheme1_transr_20.pkl', 'rb') as f:
+with open(setting.trans_loc_file, 'rb') as f:
     transition_graph = pickle.load(f)  # 在cpu上
 transition_graph = top_transition_graph(transition_graph)
 
-with open('KGE/scheme1_transh_user_20.pkl', 'rb') as f:
+# with open('KGE/scheme1_transh_user_20.pkl', 'rb') as f:
+with open(setting.trans_user_file, 'rb') as f:
     friend_graph = pickle.load(f)  # 在cpu上
 friend_graph = top_transition_graph(friend_graph)
 
 # print('已经归一化转移矩阵')
 log_string(log, '已经归一化转移矩阵')
 
-trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, transition_graph, friend_graph)  # 0.01, 100 or 1000
+trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, friend_graph, setting.use_graph_user)  # 0.01, 100 or 1000
 h0_strategy = create_h0_strategy(setting.hidden_dim, setting.is_lstm)  # 10 True or False
 trainer.prepare(poi_loader.locations(), poi_loader.user_count(), setting.hidden_dim, setting.rnn_factory,
                 setting.device)

@@ -143,7 +143,7 @@ class Flashback(nn.Module):
             friend_graph = sparse_matrix_to_tensor(friend_graph).to(x.device)
             # AX
             user_emb = self.user_encoder(torch.LongTensor(list(range(self.user_count))).to(x.device))
-            user_encoder_weight = torch.sparse.mm(graph, user_emb).to(x.device)  # (user_count, hidden_size)
+            user_encoder_weight = torch.sparse.mm(friend_graph, user_emb).to(x.device)  # (user_count, hidden_size)
 
             if self.use_weight:
                 user_encoder_weight = self.gconv_weight(user_encoder_weight)

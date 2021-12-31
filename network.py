@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from enum import Enum
 import time
+import numpy as np
 from utils import *
 import scipy.sparse as sp
 
@@ -85,7 +86,7 @@ class Flashback(nn.Module):
     """
 
     def __init__(self, input_size, user_count, hidden_size, f_t, f_s, rnn_factory, lambda_loc, lambda_user, use_weight,
-                 graph, friend_graph, use_graph_user):
+                 graph, spatial_graph, friend_graph, use_graph_user, use_spatial_graph):
         super().__init__()
         self.input_size = input_size  # POI个数
         self.user_count = user_count
@@ -97,8 +98,10 @@ class Flashback(nn.Module):
         self.lambda_user = lambda_user
         self.use_weight = use_weight
         self.graph = graph
+        self.spatial_graph = spatial_graph
         self.friend_graph = friend_graph
         self.use_graph_user = use_graph_user
+        self.use_spatial_graph = use_spatial_graph
 
         self.encoder = nn.Embedding(input_size, hidden_size)  # location embedding
         self.temp_encoder = nn.Embedding(input_size, hidden_size)
@@ -119,12 +122,19 @@ class Flashback(nn.Module):
         seq_len, user_len = x.size()
 
         I = identity(self.graph.shape[0], format='coo')
-        graph = (self.graph * self.lambda_loc + I)  # r * A + I  # sparse matrix
+        graph = (self.graph * self.lambda_loc + I).astype(np.float32)  # r * A + I  # sparse matrix
         graph = calculate_random_walk_matrix(graph)
         graph = sparse_matrix_to_tensor(graph).to(x.device)  # sparse tensor gpu
         # AX
         loc_emb = self.encoder(torch.LongTensor(list(range(self.input_size))).to(x.device))
         encoder_weight = torch.sparse.mm(graph, loc_emb).to(x.device)  # (input_size, hidden_size)
+
+        if self.use_spatial_graph:
+            spatial_graph = (self.spatial_graph * self.lambda_loc + I).astype(np.float32)
+            spatial_graph = calculate_random_walk_matrix(spatial_graph)
+            spatial_graph = sparse_matrix_to_tensor(spatial_graph).to(x.device)  # sparse tensor gpu
+            encoder_weight += torch.sparse.mm(spatial_graph, loc_emb).to(x.device)
+            encoder_weight /= 2  # 求均值
 
         if self.use_weight:
             # AXW

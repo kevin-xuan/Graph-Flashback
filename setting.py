@@ -46,12 +46,17 @@ class Setting:
 
         # log
         self.log_file = args.log_file
-        self.trans_loc_file = args.trans_loc_file
+
+        self.trans_loc_file = args.trans_loc_file  # 时间POI graph
+        self.trans_loc_spatial_file = args.trans_loc_spatial_file  # 空间POI graph
         self.trans_user_file = args.trans_user_file
-        self.use_weight = args.use_weight
+
         self.lambda_user = args.lambda_user
         self.lambda_loc = args.lambda_loc
+
+        self.use_weight = args.use_weight
         self.use_graph_user = args.use_graph_user
+        self.use_spatial_graph = args.use_spatial_graph
 
         ### CUDA Setup ###
         self.device = torch.device('cpu') if args.gpu == -1 else torch.device('cuda', args.gpu)
@@ -80,11 +85,14 @@ class Setting:
         parser.add_argument('--log_file', default='./data/log_', type=str,
                             help='存储结果日志')
         parser.add_argument('--trans_loc_file', default='./KGE/scheme1_transh_loc_20.pkl', type=str,
-                            help='使用transh方法构造的POI转换图')
+                            help='使用transh方法构造的时间POI转换图')
         parser.add_argument('--trans_user_file', default='./KGE/scheme1_transh_user_20.pkl', type=str,
-                            help='使用transh方法构造的POI转换图')
+                            help='使用transh方法构造的user转换图')
+        parser.add_argument('--trans_loc_spatial_file', default='./KGE/scheme2_transe_loc_spatial_20.pkl', type=str,
+                            help='使用transh方法构造的空间POI转换图')
         parser.add_argument('--use_weight', default=False, type=bool, help='应用于GCN的AXW中是否使用W')
         parser.add_argument('--use_graph_user', default=False, type=bool, help='是否使用user graph')
+        parser.add_argument('--use_spatial_graph', default=False, type=bool, help='是否使用空间POI graph')
 
     def parse_gowalla(self, parser):
         # defaults for gowalla dataset

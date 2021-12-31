@@ -26,12 +26,16 @@ log = open(setting.log_file, 'w')
 
 print(setting)
 
-log_string(log, setting.trans_user_file)
-log_string(log, setting.trans_loc_file)
-log_string(log, 'AXW: ' + str(setting.use_weight))
+log_string(log, 'user_file: ' + setting.trans_user_file)
+log_string(log, 'loc_temporal_file: ' + setting.trans_loc_file)
+log_string(log, 'loc_spatial_file: ' + setting.trans_loc_spatial_file)
+
 log_string(log, str(setting.lambda_user))
 log_string(log, str(setting.lambda_loc))
+
+log_string(log, 'W in AXW: ' + str(setting.use_weight))
 log_string(log, 'GCN in user: ' + str(setting.use_graph_user))
+log_string(log, 'spatial graph: ' + str(setting.use_spatial_graph))
 
 # load dataset
 poi_loader = PoiDataloader(setting.max_users, setting.min_checkins)  # 0， 5*20+1
@@ -51,12 +55,14 @@ dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False)
 assert setting.batch_size < poi_loader.user_count(), 'batch size must be lower than the amount of available users'
 
 # create flashback trainer
-# with open('KGE/scheme1_transr_20.pkl', 'rb') as f:
-with open(setting.trans_loc_file, 'rb') as f:
+with open(setting.trans_loc_file, 'rb') as f:  # 时间POI graph
     transition_graph = pickle.load(f)  # 在cpu上
 transition_graph = top_transition_graph(transition_graph)
 
-# with open('KGE/scheme1_transh_user_20.pkl', 'rb') as f:
+with open(setting.trans_loc_spatial_file, 'rb') as f:  # 空间POI graph
+    spatial_graph = pickle.load(f)  # 在cpu上
+spatial_graph = top_transition_graph(spatial_graph)
+
 with open(setting.trans_user_file, 'rb') as f:
     friend_graph = pickle.load(f)  # 在cpu上
 friend_graph = top_transition_graph(friend_graph)
@@ -64,7 +70,7 @@ friend_graph = top_transition_graph(friend_graph)
 # print('已经归一化转移矩阵')
 log_string(log, '已经归一化转移矩阵')
 
-trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, friend_graph, setting.use_graph_user)  # 0.01, 100 or 1000
+trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user, setting.use_spatial_graph)  # 0.01, 100 or 1000
 h0_strategy = create_h0_strategy(setting.hidden_dim, setting.is_lstm)  # 10 True or False
 trainer.prepare(poi_loader.locations(), poi_loader.user_count(), setting.hidden_dim, setting.rnn_factory,
                 setting.device)
@@ -134,7 +140,7 @@ for e in range(setting.epochs):  # 100
         log_string(log, f'Used learning rate: {scheduler.get_last_lr()[0]}')
         log_string(log, f'Avg Loss: {epoch_loss}')
 
-    if (e + 1) % setting.validate_epoch == 0 and (e + 1) >= 25:  # 第25轮效果最好, 直接评估这一轮
+    if (e + 1) % setting.validate_epoch == 0:  # 第25轮效果最好, 直接评估这一轮  and (e + 1) >= 25
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         evl_start = time.time()

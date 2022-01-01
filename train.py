@@ -26,6 +26,7 @@ log = open(setting.log_file, 'w')
 
 print(setting)
 
+log_string(log, 'log_file: ' + setting.log_file)
 log_string(log, 'user_file: ' + setting.trans_user_file)
 log_string(log, 'loc_temporal_file: ' + setting.trans_loc_file)
 log_string(log, 'loc_spatial_file: ' + setting.trans_loc_spatial_file)
@@ -57,15 +58,21 @@ assert setting.batch_size < poi_loader.user_count(), 'batch size must be lower t
 # create flashback trainer
 with open(setting.trans_loc_file, 'rb') as f:  # 时间POI graph
     transition_graph = pickle.load(f)  # 在cpu上
-transition_graph = top_transition_graph(transition_graph)
+# transition_graph = top_transition_graph(transition_graph)
 
-with open(setting.trans_loc_spatial_file, 'rb') as f:  # 空间POI graph
-    spatial_graph = pickle.load(f)  # 在cpu上
-spatial_graph = top_transition_graph(spatial_graph)
+if setting.use_spatial_graph:
+    with open(setting.trans_loc_spatial_file, 'rb') as f:  # 空间POI graph
+        spatial_graph = pickle.load(f)  # 在cpu上
+    # spatial_graph = top_transition_graph(spatial_graph)
+else:
+    spatial_graph = None
 
-with open(setting.trans_user_file, 'rb') as f:
-    friend_graph = pickle.load(f)  # 在cpu上
-friend_graph = top_transition_graph(friend_graph)
+if setting.use_graph_user:
+    with open(setting.trans_user_file, 'rb') as f:
+        friend_graph = pickle.load(f)  # 在cpu上
+    # friend_graph = top_transition_graph(friend_graph)
+else:
+    friend_graph = None
 
 # print('已经归一化转移矩阵')
 log_string(log, '已经归一化转移矩阵')

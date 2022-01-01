@@ -97,11 +97,13 @@ class Flashback(nn.Module):
         self.lambda_loc = lambda_loc
         self.lambda_user = lambda_user
         self.use_weight = use_weight
+        self.use_graph_user = use_graph_user
+        self.use_spatial_graph = use_spatial_graph
+        # self.I = identity(self.graph.shape[0], format='coo')
+        # self.graph = (graph * self.lambda_loc + self.I).astype(np.float32)
         self.graph = graph
         self.spatial_graph = spatial_graph
         self.friend_graph = friend_graph
-        self.use_graph_user = use_graph_user
-        self.use_spatial_graph = use_spatial_graph
 
         self.encoder = nn.Embedding(input_size, hidden_size)  # location embedding
         self.temp_encoder = nn.Embedding(input_size, hidden_size)
@@ -112,7 +114,8 @@ class Flashback(nn.Module):
 
         # GCN里使用的AXW中的权重矩阵W从这两个随便选一个试试
         # self._gconv_params = LayerParams(self, 'gconv')
-        self.gconv_weight = nn.Linear(hidden_size, hidden_size)
+        self.loc_gconv_weight = nn.Linear(hidden_size, hidden_size)
+        self.user_gconv_weight = nn.Linear(hidden_size, hidden_size)
 
         self.rnn = rnn_factory.create(hidden_size)  # 改了这里！！！
         self.fc = nn.Linear(2 * hidden_size, input_size)  # create outputs in length of locations
@@ -143,12 +146,12 @@ class Flashback(nn.Module):
             # encoder_weight = torch.matmul(encoder_weight, weights)  # (input_size, hidden_size)
             # encoder_weight += biases
             # 或者
-            encoder_weight = self.gconv_weight(encoder_weight)
+            encoder_weight = self.loc_gconv_weight(encoder_weight)
 
         # 是否用GCN来更新user embedding
         if self.use_graph_user:
             I_f = identity(self.friend_graph.shape[0], format='coo')
-            friend_graph = (self.friend_graph * self.lambda_user + I_f)
+            friend_graph = (self.friend_graph * self.lambda_user + I_f).astype(np.float32)
             friend_graph = calculate_random_walk_matrix(friend_graph)
             friend_graph = sparse_matrix_to_tensor(friend_graph).to(x.device)
             # AX
@@ -156,7 +159,7 @@ class Flashback(nn.Module):
             user_encoder_weight = torch.sparse.mm(friend_graph, user_emb).to(x.device)  # (user_count, hidden_size)
 
             if self.use_weight:
-                user_encoder_weight = self.gconv_weight(user_encoder_weight)
+                user_encoder_weight = self.user_gconv_weight(user_encoder_weight)
             p_u = torch.index_select(user_encoder_weight, 0, active_user.squeeze())
         else:
             p_u = self.user_encoder(active_user)  # (1, user_len, hidden_size)

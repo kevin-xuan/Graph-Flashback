@@ -22,11 +22,11 @@ class FlashbackTrainer():
         self.lambda_loc = lambda_loc
         self.lambda_user = lambda_user
         self.use_weight = use_weight
+        self.use_graph_user = use_graph_user
+        self.use_spatial_graph = use_spatial_graph
         self.graph = transition_graph
         self.spatial_graph = spatial_graph
         self.friend_graph = friend_graph
-        self.use_graph_user = use_graph_user
-        self.use_spatial_graph = use_spatial_graph
 
     def __str__(self):
         return 'Use flashback training.'

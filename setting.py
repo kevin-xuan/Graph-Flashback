@@ -66,7 +66,7 @@ class Setting:
         parser.add_argument('--gpu', default=0, type=int, help='the gpu to use')  # -1
         parser.add_argument('--hidden-dim', default=10, type=int, help='hidden dimensions to use')
         parser.add_argument('--weight_decay', default=0.0, type=float, help='weight decay regularization')
-        parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
+        parser.add_argument('--lr', default=0.01, type=float, help='learning rate')  # 0.01
         parser.add_argument('--epochs', default=100, type=int, help='amount of epochs')
         parser.add_argument('--rnn', default='rnn', type=str, help='the GRU implementation to use: [rnn|gru|lstm]')
 
@@ -82,13 +82,13 @@ class Setting:
                             help='report every x user on evaluation (-1: ignore)')
 
         # log
-        parser.add_argument('--log_file', default='./data/log_', type=str,
+        parser.add_argument('--log_file', default='./data/log_scheme1_transh_20_1.0_AX_loc_t_lr_0.001', type=str,
                             help='存储结果日志')
-        parser.add_argument('--trans_loc_file', default='./KGE/scheme1_transh_loc_20.pkl', type=str,
+        parser.add_argument('--trans_loc_file', default='./KGE/scheme1_transh_loc_temporal_20.pkl', type=str,
                             help='使用transh方法构造的时间POI转换图')
-        parser.add_argument('--trans_user_file', default='./KGE/scheme1_transh_user_20.pkl', type=str,
+        parser.add_argument('--trans_user_file', default='', type=str,
                             help='使用transh方法构造的user转换图')
-        parser.add_argument('--trans_loc_spatial_file', default='./KGE/scheme2_transe_loc_spatial_20.pkl', type=str,
+        parser.add_argument('--trans_loc_spatial_file', default='', type=str,
                             help='使用transh方法构造的空间POI转换图')
         parser.add_argument('--use_weight', default=False, type=bool, help='应用于GCN的AXW中是否使用W')
         parser.add_argument('--use_graph_user', default=False, type=bool, help='是否使用user graph')

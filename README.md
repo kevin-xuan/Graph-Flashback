@@ -15,7 +15,7 @@ Download the data.zip, and unzip it and put it in the data folder.
 
 # Model Training
 ```
-python train.py
+bash submit.sh
 ```
 
 

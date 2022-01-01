@@ -11,7 +11,7 @@
 
 # Data Preparation
 
-Download the data.zip, and unzip it and put it in the data folder.
+将flashback_data.zip放到data目录下解压后得到2个txt文件, 将flashback_gowalla_transh_scheme1.zip放到KGE目录下解压后得到5个graph.pkl文件
 
 # Model Training
 ```

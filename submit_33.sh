@@ -15,4 +15,4 @@
 module load cudnn/7.5.0-cuda10.1.105
 module load nccl/2.4.8-cuda10.1
 cd /home/hanp/hanp/research/UESTC/xuan_rao/new_Flashback_code 
-/home/hanp/anaconda3/envs/rx_torch/bin/python train.py --trans_loc_file KGE/scheme1_transh_loc_temporal_20.pkl --hidden-dim 60
+/home/hanp/anaconda3/envs/rx_torch/bin/python train.py --trans_loc_file KGE/scheme1_transh_loc_temporal_20.pkl --hidden-dim 60 --weight_decay 0.00001

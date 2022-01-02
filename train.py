@@ -11,6 +11,7 @@ from utils import *
 from network import create_h0_strategy
 from evaluation import Evaluation
 from tqdm import tqdm
+from scipy.sparse import coo_matrix
 
 '''
 Main train script to invoke from commandline.
@@ -59,11 +60,13 @@ assert setting.batch_size < poi_loader.user_count(), 'batch size must be lower t
 with open(setting.trans_loc_file, 'rb') as f:  # 时间POI graph
     transition_graph = pickle.load(f)  # 在cpu上
 # transition_graph = top_transition_graph(transition_graph)
+transition_graph = coo_matrix(transition_graph)
 
 if setting.use_spatial_graph:
     with open(setting.trans_loc_spatial_file, 'rb') as f:  # 空间POI graph
         spatial_graph = pickle.load(f)  # 在cpu上
     # spatial_graph = top_transition_graph(spatial_graph)
+    spatial_graph = coo_matrix(spatial_graph)
 else:
     spatial_graph = None
 
@@ -71,6 +74,7 @@ if setting.use_graph_user:
     with open(setting.trans_user_file, 'rb') as f:
         friend_graph = pickle.load(f)  # 在cpu上
     # friend_graph = top_transition_graph(friend_graph)
+    friend_graph = coo_matrix(friend_graph)
 else:
     friend_graph = None
 
@@ -123,14 +127,14 @@ for e in range(setting.epochs):  # 100
         forward_start = time.time()
         loss = trainer.loss(x, t, t_slot, s, y, y_t, y_t_slot, y_s, h, active_users)
 
-        # print('One forward: ', time.time() - forward_start)
+        print('One forward: ', time.time() - forward_start)
 
         start = time.time()
         loss.backward(retain_graph=True)
 
-        torch.nn.utils.clip_grad_norm_(trainer.parameters(), 5)
+        # torch.nn.utils.clip_grad_norm_(trainer.parameters(), 5)
         end = time.time()
-        # print('反向传播需要{}s'.format(end - start))
+        print('反向传播需要{}s'.format(end - start))
         losses.append(loss.item())
         optimizer.step()
 
@@ -147,7 +151,7 @@ for e in range(setting.epochs):  # 100
         log_string(log, f'Used learning rate: {scheduler.get_last_lr()[0]}')
         log_string(log, f'Avg Loss: {epoch_loss}')
 
-    if (e + 1) % setting.validate_epoch == 0:  # 第25轮效果最好, 直接评估这一轮  and (e + 1) >= 25
+    if (e + 1) % setting.validate_epoch == 0 and (e + 1) >= 25:  # 第25轮效果最好, 直接评估这一轮
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         evl_start = time.time()

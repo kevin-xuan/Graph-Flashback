@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH --partition=batch
-#SBATCH -J submit_transh_lambda_weight_loc_10
-#SBATCH -o submit_transh_lambda_weight_loc_10.%J.out
-#SBATCH -e submit_transh_lambda_weight_loc_10.%J.err
+#SBATCH -J submit_transh_lambda_weight_loc_24
+#SBATCH -o submit_transh_lambda_weight_loc_24.%J.out
+#SBATCH -e submit_transh_lambda_weight_loc_24.%J.err
 #SBATCH --mail-user=peng.han@kaust.edu.sa
 #SBATCH --mail-type=ALL
 #SBATCH --time=48:30:00

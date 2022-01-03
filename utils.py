@@ -31,24 +31,29 @@ def load_pickle(pickle_file):
     return pickle_data
 
 
+# def calculate_preference_similarity(m1, m2, pref):
+#     """
+#         m1: (user_len, hidden_size)
+#         m2：(user_len, seq_len, hidden_size)
+#         return: calculate the similarity between user and location, which means user's preference about location
+#     """
+#     user_len = m1.shape[0]
+#     seq_len = m2.shape[1]
+#     pref = pref.squeeze()  # (1, hidden_size) -> (hidden_size, )
+#     similarity = torch.zeros(user_len, seq_len, dtype=torch.float32)
+#     for i in range(user_len):
+#         v1 = m1[i]
+#         for j in range(seq_len):
+#             v2 = m2[i][j]
+#             similarity[i][j] = (1 + torch.cosine_similarity(v1 + pref, v2, dim=0).item()) / 2  # 归一化到[0, 1]
+
+#     return similarity
+
 def calculate_preference_similarity(m1, m2, pref):
-    """
-        m1: (user_len, hidden_size)
-        m2：(user_len, seq_len, hidden_size)
-        return: calculate the similarity between user and location, which means user's preference about location
-    """
-    user_len = m1.shape[0]
-    seq_len = m2.shape[1]
-    pref = pref.squeeze()  # (1, hidden_size) -> (hidden_size, )
-    similarity = torch.zeros(user_len, seq_len, dtype=torch.float32)
-    for i in range(user_len):
-        v1 = m1[i]
-        for j in range(seq_len):
-            v2 = m2[i][j]
-            similarity[i][j] = (1 + torch.cosine_similarity(v1 + pref, v2, dim=0).item()) / 2  # 归一化到[0, 1]
-
-    return similarity
-
+    m1 = (m1 + pref).unsqueeze(1)
+    s = m1 - m2
+    sim = torch.exp(-(torch.norm(s, p=2, dim=-1)))
+    return sim
 
 def calculate_friendship_similarity(u1, m2, pref, device):
     """

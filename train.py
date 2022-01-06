@@ -31,6 +31,7 @@ log_string(log, 'log_file: ' + setting.log_file)
 log_string(log, 'user_file: ' + setting.trans_user_file)
 log_string(log, 'loc_temporal_file: ' + setting.trans_loc_file)
 log_string(log, 'loc_spatial_file: ' + setting.trans_loc_spatial_file)
+log_string(log, 'interact_file: ' + setting.trans_interact_file)
 
 log_string(log, str(setting.lambda_user))
 log_string(log, str(setting.lambda_loc))
@@ -74,14 +75,19 @@ if setting.use_graph_user:
     with open(setting.trans_user_file, 'rb') as f:
         friend_graph = pickle.load(f)  # 在cpu上
     # friend_graph = top_transition_graph(friend_graph)
-    friend_graph = coo_matrix(friend_graph)
+    friend_graph = coo_matrix(friend_graph) / 2  # 构造图的时候忘记求均值了!!!!!
 else:
     friend_graph = None
 
-# print('已经归一化转移矩阵')
-log_string(log, '已经归一化转移矩阵')
+with open(setting.trans_interact_file, 'rb') as f:  # 空间POI graph
+    interact_graph = pickle.load(f)  # 在cpu上
+interact_graph = coo_matrix(interact_graph)
 
-trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user, setting.use_spatial_graph)  # 0.01, 100 or 1000
+# print('已经归一化转移矩阵')
+# log_string(log, '已经归一化转移矩阵')
+log_string(log, 'Successfully load graph')
+
+trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user, setting.use_spatial_graph, interact_graph)  # 0.01, 100 or 1000
 h0_strategy = create_h0_strategy(setting.hidden_dim, setting.is_lstm)  # 10 True or False
 trainer.prepare(poi_loader.locations(), poi_loader.user_count(), setting.hidden_dim, setting.rnn_factory,
                 setting.device)
@@ -100,7 +106,7 @@ for e in range(setting.epochs):  # 100
     dataset.shuffle_users()  # shuffle users before each epoch!
 
     losses = []
-
+    epoch_start = time.time()
     for i, (x, t, t_slot, s, y, y_t, y_t_slot, y_s, reset_h, active_users) in enumerate(dataloader):
         # reset hidden states for newly added users
         for j, reset in enumerate(reset_h):
@@ -127,20 +133,22 @@ for e in range(setting.epochs):  # 100
         forward_start = time.time()
         loss = trainer.loss(x, t, t_slot, s, y, y_t, y_t_slot, y_s, h, active_users)
 
-        print('One forward: ', time.time() - forward_start)
+        # print('One forward: ', time.time() - forward_start)
 
         start = time.time()
         loss.backward(retain_graph=True)
 
         # torch.nn.utils.clip_grad_norm_(trainer.parameters(), 5)
         end = time.time()
-        print('反向传播需要{}s'.format(end - start))
+        # print('反向传播需要{}s'.format(end - start))
         losses.append(loss.item())
         optimizer.step()
 
     # schedule learning rate:
     scheduler.step()
     bar.update(1)
+    epoch_end = time.time()
+    log_string(log, 'One training need {:.2f}s'.format(epoch_end - epoch_start))
     # statistics:
     if (e + 1) % 1 == 0:
         epoch_loss = np.mean(losses)
@@ -151,11 +159,14 @@ for e in range(setting.epochs):  # 100
         log_string(log, f'Used learning rate: {scheduler.get_last_lr()[0]}')
         log_string(log, f'Avg Loss: {epoch_loss}')
 
-    if (e + 1) % setting.validate_epoch == 0 or (e + 1) >= 20:  # 第25轮效果最好, 直接评估这一轮
+    # if (e + 1) >= 21:  # 第25轮效果最好, 直接评估这一轮  (e + 1) % setting.validate_epoch == 0 or
+    if 21 <= (e + 1) <= 27 or 40 <= (e + 1) <= 46:
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         evl_start = time.time()
         evaluation_test.evaluate()
         evl_end = time.time()
-        print('评估需要{:.2f}'.format(evl_end - evl_start))
+        # print('评估需要{:.2f}'.format(evl_end - evl_start))
+        log_string(log, 'One evaluate need {:.2f}s'.format(evl_end - evl_start))
+
 bar.close()

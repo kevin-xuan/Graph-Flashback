@@ -13,7 +13,8 @@ class FlashbackTrainer():
     Performs loss computation and prediction.
     """
 
-    def __init__(self, lambda_t, lambda_s, lambda_loc, lambda_user, use_weight, transition_graph, spatial_graph, friend_graph, use_graph_user, use_spatial_graph):
+    def __init__(self, lambda_t, lambda_s, lambda_loc, lambda_user, use_weight, transition_graph, spatial_graph,
+                 friend_graph, use_graph_user, use_spatial_graph, interact_graph):
         """ The hyper parameters to control spatial and temporal decay.
         """
         self.lambda_t = lambda_t
@@ -27,6 +28,7 @@ class FlashbackTrainer():
         self.graph = transition_graph
         self.spatial_graph = spatial_graph
         self.friend_graph = friend_graph
+        self.interact_graph = interact_graph
 
     def __str__(self):
         return 'Use flashback training.'
@@ -40,7 +42,9 @@ class FlashbackTrainer():
         f_s = lambda delta_s, user_len: torch.exp(-(delta_s * self.lambda_s))  # exp decay  2个functions
         self.loc_count = loc_count
         self.cross_entropy_loss = nn.CrossEntropyLoss()
-        self.model = Flashback(loc_count, user_count, hidden_size, f_t, f_s, gru_factory, self.lambda_loc,  self.lambda_user, self.use_weight, self.graph, self.spatial_graph, self.friend_graph, self.use_graph_user, self.use_spatial_graph).to(device)
+        self.model = Flashback(loc_count, user_count, hidden_size, f_t, f_s, gru_factory, self.lambda_loc,
+                               self.lambda_user, self.use_weight, self.graph, self.spatial_graph, self.friend_graph,
+                               self.use_graph_user, self.use_spatial_graph, self.interact_graph).to(device)
 
     def evaluate(self, x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_users):
         """ takes a batch (users x location sequence)
@@ -75,31 +79,7 @@ class FlashbackTrainer():
                             active_users)  # out (seq_len, batch_size, loc_count)
         out = out.view(-1, self.loc_count)  # (seq_len * batch_size, loc_count)
 
-        # out = torch.softmax(out, dim=1)
-        # out = torch.log(out + 1e-8)  # 防止log0出现
-        # print(out)
-        # print(torch.where(torch.isnan(out) == True))
-
-        # values, indices = torch.max(out, dim=1)  # 防止softmax下溢出
-        # out = out - values.unsqueeze(1)
-        # temp = F.log_softmax(out, dim=1)
-        # print(temp)
-        #
-        # print(torch.where(torch.isnan(temp) == True))
-        # print(torch.min(temp, dim=1))
-        # print(torch.min(temp))
-        # print(torch.max(temp))
-        # print(torch.where(torch.isnan(F.log_softmax(out, dim=1)) == True))
-
-        # out = out + 1e-2  # 避免out太小以至于softmax结果为0
-        # out = out.t()  # (loc_count, seq_len * batch_size)
-        # graph = sparse_matrix_to_tensor(self.graph).to(x.device)  # (loc_count, loc_count)
-        # graph = graph.t()
-        # out = torch.sparse.mm(graph, out)  # (loc_count, seq_len * batch_size)
-        # out = out.t()  # (seq_len * batch_size, loc_count)
-
         y = y.view(-1)  # (seq_len * batch_size)
-        # l = nn.NLLLoss()(out, y)
         l = self.cross_entropy_loss(out, y)
         # print(l.item())
         return l

@@ -87,7 +87,7 @@ class Setting:
                             help='存储结果日志')
         parser.add_argument('--trans_loc_file', default='./KGE/gowalla_scheme2_transe_loc_temporal_100.pkl', type=str,
                             help='使用transh方法构造的时间POI转换图')
-        parser.add_argument('--trans_user_file', default='./KGE/gowalla_scheme1_transh_user_20.pkl', type=str,
+        parser.add_argument('--trans_user_file', default='', type=str,
                             help='使用transh方法构造的user转换图')
         parser.add_argument('--trans_loc_spatial_file', default='', type=str,
                             help='使用transh方法构造的空间POI转换图')
@@ -103,7 +103,7 @@ class Setting:
                             help='amount of users to process in one pass (batching)')
         parser.add_argument('--lambda_t', default=0.1, type=float, help='decay factor for temporal data')
         parser.add_argument('--lambda_s', default=1000, type=float, help='decay factor for spatial data')
-        parser.add_argument('--lambda_loc', default=1.1, type=float, help='weight factor for transition graph')
+        parser.add_argument('--lambda_loc', default=1.5, type=float, help='weight factor for transition graph')
         parser.add_argument('--lambda_user', default=1.0, type=float, help='weight factor for user graph')
 
     def parse_foursquare(self, parser):

@@ -79,15 +79,15 @@ if setting.use_graph_user:
 else:
     friend_graph = None
 
-with open(setting.trans_interact_file, 'rb') as f:  # 空间POI graph
-    interact_graph = pickle.load(f)  # 在cpu上
-interact_graph = coo_matrix(interact_graph)
+# with open(setting.trans_interact_file, 'rb') as f:  # 空间POI graph
+#     interact_graph = pickle.load(f)  # 在cpu上
+# interact_graph = coo_matrix(interact_graph)
 
 # print('已经归一化转移矩阵')
 # log_string(log, '已经归一化转移矩阵')
 log_string(log, 'Successfully load graph')
 
-trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user, setting.use_spatial_graph, interact_graph)  # 0.01, 100 or 1000
+trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user, setting.use_spatial_graph)  # 0.01, 100 or 1000
 h0_strategy = create_h0_strategy(setting.hidden_dim, setting.is_lstm)  # 10 True or False
 trainer.prepare(poi_loader.locations(), poi_loader.user_count(), setting.hidden_dim, setting.rnn_factory,
                 setting.device)
@@ -160,7 +160,7 @@ for e in range(setting.epochs):  # 100
         log_string(log, f'Avg Loss: {epoch_loss}')
 
     # if (e + 1) >= 21:  # 第25轮效果最好, 直接评估这一轮  (e + 1) % setting.validate_epoch == 0 or
-    if 21 <= (e + 1) <= 27 or 40 <= (e + 1) <= 46:
+    if 40 <= (e + 1) <= 46:
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         evl_start = time.time()

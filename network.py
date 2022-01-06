@@ -127,7 +127,7 @@ class Flashback(nn.Module):
     """
 
     def __init__(self, input_size, user_count, hidden_size, f_t, f_s, rnn_factory, lambda_loc, lambda_user, use_weight,
-                 graph, spatial_graph, friend_graph, use_graph_user, use_spatial_graph, interact_graph):
+                 graph, spatial_graph, friend_graph, use_graph_user, use_spatial_graph):
         super().__init__()
         self.input_size = input_size  # POI个数
         self.user_count = user_count
@@ -143,7 +143,7 @@ class Flashback(nn.Module):
 
         self.I = identity(graph.shape[0], format='coo')
         self.graph = sparse_matrix_to_tensor(calculate_random_walk_matrix((graph * self.lambda_loc + self.I).astype(np.float32)))
-        self.interact_graph = sparse_matrix_to_tensor(calculate_random_walk_matrix(interact_graph))
+        # self.interact_graph = sparse_matrix_to_tensor(calculate_random_walk_matrix(interact_graph))
 
         # self.graph = graph
         self.spatial_graph = spatial_graph

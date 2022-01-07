@@ -99,11 +99,11 @@ class Setting:
 
     def parse_gowalla(self, parser):
         # defaults for gowalla dataset
-        parser.add_argument('--batch-size', default=100, type=int,  # 200
+        parser.add_argument('--batch-size', default=200, type=int,  # 200
                             help='amount of users to process in one pass (batching)')
         parser.add_argument('--lambda_t', default=0.1, type=float, help='decay factor for temporal data')
         parser.add_argument('--lambda_s', default=1000, type=float, help='decay factor for spatial data')
-        parser.add_argument('--lambda_loc', default=1.5, type=float, help='weight factor for transition graph')
+        parser.add_argument('--lambda_loc', default=1.0, type=float, help='weight factor for transition graph')
         parser.add_argument('--lambda_user', default=1.0, type=float, help='weight factor for user graph')
 
     def parse_foursquare(self, parser):

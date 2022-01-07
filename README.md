@@ -18,6 +18,8 @@ new_Flashback_code/data/checkins-gowalla.txt
 new_Flashback_code/data/checkins-4sq.txt
 
 
+
+
 再将poi_graph.zip放到根目录的KGE文件夹下解压后得到36个graph.pkl文件，目录如下：
 
 new_Flashback_code/KGE/gowalla_scheme1_transh_loc_temporal_20.pkl

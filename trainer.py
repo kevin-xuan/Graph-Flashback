@@ -1,3 +1,11 @@
+'''
+Descripttion: 
+version: 
+Author: Paulzzzhang
+Date: 2022-01-08 22:44:10
+LastEditors: Paulzzzhang
+LastEditTime: 2022-01-09 12:59:40
+'''
 import time
 
 import torch
@@ -14,7 +22,7 @@ class FlashbackTrainer():
     """
 
     def __init__(self, lambda_t, lambda_s, lambda_loc, lambda_user, use_weight, transition_graph, spatial_graph,
-                 friend_graph, use_graph_user, use_spatial_graph):
+                 friend_graph, use_graph_user, use_spatial_graph, interact_graph):
         """ The hyper parameters to control spatial and temporal decay.
         """
         self.lambda_t = lambda_t
@@ -28,7 +36,7 @@ class FlashbackTrainer():
         self.graph = transition_graph
         self.spatial_graph = spatial_graph
         self.friend_graph = friend_graph
-        # self.interact_graph = interact_graph
+        self.interact_graph = interact_graph
 
     def __str__(self):
         return 'Use flashback training.'
@@ -37,14 +45,16 @@ class FlashbackTrainer():
         return self.model.parameters()
 
     def prepare(self, loc_count, user_count, hidden_size, gru_factory, device):
-        f_t = lambda delta_t, user_len: ((torch.cos(delta_t * 2 * np.pi / 86400) + 1) / 2) * torch.exp(
+        def f_t(delta_t, user_len): return ((torch.cos(delta_t * 2 * np.pi / 86400) + 1) / 2) * torch.exp(
             -(delta_t / 86400 * self.lambda_t))  # hover cosine + exp decay
-        f_s = lambda delta_s, user_len: torch.exp(-(delta_s * self.lambda_s))  # exp decay  2个functions
+
+        # exp decay  2个functions
+        def f_s(delta_s, user_len): return torch.exp(-(delta_s * self.lambda_s))
         self.loc_count = loc_count
         self.cross_entropy_loss = nn.CrossEntropyLoss()
         self.model = Flashback(loc_count, user_count, hidden_size, f_t, f_s, gru_factory, self.lambda_loc,
                                self.lambda_user, self.use_weight, self.graph, self.spatial_graph, self.friend_graph,
-                               self.use_graph_user, self.use_spatial_graph).to(device)
+                               self.use_graph_user, self.use_spatial_graph, self.interact_graph).to(device)
 
     def evaluate(self, x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_users):
         """ takes a batch (users x location sequence)
@@ -56,7 +66,9 @@ class FlashbackTrainer():
         """
 
         self.model.eval()
-        out, h = self.model(x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_users)  # (seq_len, user_len, loc_count)
+        # (seq_len, user_len, loc_count)
+        out, h = self.model(x, t, t_slot, s, y_t,
+                            y_t_slot, y_s, h, active_users)
 
         # seq_len, user_len, loc_count = out.shape
         # out = out.view(-1, self.loc_count)  # (seq_len * batch_size, loc_count)

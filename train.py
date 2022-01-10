@@ -41,7 +41,8 @@ log_string(log, 'GCN in user: ' + str(setting.use_graph_user))
 log_string(log, 'spatial graph: ' + str(setting.use_spatial_graph))
 
 # load dataset
-poi_loader = PoiDataloader(setting.max_users, setting.min_checkins)  # 0， 5*20+1
+poi_loader = PoiDataloader(
+    setting.max_users, setting.min_checkins)  # 0， 5*20+1
 poi_loader.read(setting.dataset_file)
 # print('Active POI number: ', poi_loader.locations())  # 18737 106994
 # print('Active User number: ', poi_loader.user_count())  # 32510 7768
@@ -51,11 +52,14 @@ log_string(log, 'Active POI number:{}'.format(poi_loader.locations()))
 log_string(log, 'Active User number:{}'.format(poi_loader.user_count()))
 log_string(log, 'Total Checkins number:{}'.format(poi_loader.checkins_count()))
 
-dataset = poi_loader.create_dataset(setting.sequence_length, setting.batch_size, Split.TRAIN)  # 20, 200 or 1024, 0
+dataset = poi_loader.create_dataset(
+    setting.sequence_length, setting.batch_size, Split.TRAIN)  # 20, 200 or 1024, 0
 dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
-dataset_test = poi_loader.create_dataset(setting.sequence_length, setting.batch_size, Split.TEST)
+dataset_test = poi_loader.create_dataset(
+    setting.sequence_length, setting.batch_size, Split.TEST)
 dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False)
-assert setting.batch_size < poi_loader.user_count(), 'batch size must be lower than the amount of available users'
+assert setting.batch_size < poi_loader.user_count(
+), 'batch size must be lower than the amount of available users'
 
 # create flashback trainer
 with open(setting.trans_loc_file, 'rb') as f:  # 时间POI graph
@@ -75,28 +79,34 @@ if setting.use_graph_user:
     with open(setting.trans_user_file, 'rb') as f:
         friend_graph = pickle.load(f)  # 在cpu上
     # friend_graph = top_transition_graph(friend_graph)
-    friend_graph = coo_matrix(friend_graph) / 2  # 构造图的时候忘记求均值了!!!!!
+    friend_graph = coo_matrix(friend_graph)
 else:
     friend_graph = None
 
-# with open(setting.trans_interact_file, 'rb') as f:  # 空间POI graph
-#     interact_graph = pickle.load(f)  # 在cpu上
-# interact_graph = coo_matrix(interact_graph)
+with open(setting.trans_interact_file, 'rb') as f:  # 空间POI graph
+    interact_graph = pickle.load(f)  # 在cpu上
+interact_graph = csr_matrix(interact_graph)
 
 # print('已经归一化转移矩阵')
 # log_string(log, '已经归一化转移矩阵')
 log_string(log, 'Successfully load graph')
 
-trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user, setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user, setting.use_spatial_graph)  # 0.01, 100 or 1000
-h0_strategy = create_h0_strategy(setting.hidden_dim, setting.is_lstm)  # 10 True or False
+trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user,
+                           setting.use_weight, transition_graph, spatial_graph, friend_graph, setting.use_graph_user,
+                           setting.use_spatial_graph, interact_graph)  # 0.01, 100 or 1000
+h0_strategy = create_h0_strategy(
+    setting.hidden_dim, setting.is_lstm)  # 10 True or False
 trainer.prepare(poi_loader.locations(), poi_loader.user_count(), setting.hidden_dim, setting.rnn_factory,
                 setting.device)
-evaluation_test = Evaluation(dataset_test, dataloader_test, poi_loader.user_count(), h0_strategy, trainer, setting, log)
+evaluation_test = Evaluation(dataset_test, dataloader_test,
+                             poi_loader.user_count(), h0_strategy, trainer, setting, log)
 print('{} {}'.format(trainer, setting.rnn_factory))
 
 #  training loop
-optimizer = torch.optim.Adam(trainer.parameters(), lr=setting.learning_rate, weight_decay=setting.weight_decay)
-scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 40, 60, 80], gamma=0.2)
+optimizer = torch.optim.Adam(trainer.parameters(
+), lr=setting.learning_rate, weight_decay=setting.weight_decay)
+scheduler = torch.optim.lr_scheduler.MultiStepLR(
+    optimizer, milestones=[20, 40, 60, 80], gamma=0.2)
 
 bar = tqdm(total=setting.epochs)
 bar.set_description('Training')
@@ -131,7 +141,8 @@ for e in range(setting.epochs):  # 100
 
         optimizer.zero_grad()
         forward_start = time.time()
-        loss = trainer.loss(x, t, t_slot, s, y, y_t, y_t_slot, y_s, h, active_users)
+        loss = trainer.loss(x, t, t_slot, s, y, y_t,
+                            y_t_slot, y_s, h, active_users)
 
         # print('One forward: ', time.time() - forward_start)
 
@@ -148,7 +159,8 @@ for e in range(setting.epochs):  # 100
     scheduler.step()
     bar.update(1)
     epoch_end = time.time()
-    log_string(log, 'One training need {:.2f}s'.format(epoch_end - epoch_start))
+    log_string(log, 'One training need {:.2f}s'.format(
+        epoch_end - epoch_start))
     # statistics:
     if (e + 1) % 1 == 0:
         epoch_loss = np.mean(losses)
@@ -160,6 +172,7 @@ for e in range(setting.epochs):  # 100
         log_string(log, f'Avg Loss: {epoch_loss}')
 
     # if (e + 1) >= 21:  # 第25轮效果最好, 直接评估这一轮  (e + 1) % setting.validate_epoch == 0 or
+    # if (e + 1) == 23 or (e + 1) == 43:
     if (e + 1) % setting.validate_epoch == 0:
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
@@ -167,6 +180,7 @@ for e in range(setting.epochs):  # 100
         evaluation_test.evaluate()
         evl_end = time.time()
         # print('评估需要{:.2f}'.format(evl_end - evl_start))
-        log_string(log, 'One evaluate need {:.2f}s'.format(evl_end - evl_start))
+        log_string(log, 'One evaluate need {:.2f}s'.format(
+            evl_end - evl_start))
 
 bar.close()

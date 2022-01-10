@@ -77,7 +77,7 @@ class Setting:
         parser.add_argument('--friendship', default='gowalla_friend.txt', type=str,
                             help='the friendship file under ../data/<edges.txt> to load')
         # evaluation        
-        parser.add_argument('--validate-epoch', default=5, type=int,
+        parser.add_argument('--validate-epoch', default=4, type=int,
                             help='run each validation after this amount of epochs')
         parser.add_argument('--report-user', default=-1, type=int,
                             help='report every x user on evaluation (-1: ignore)')

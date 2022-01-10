@@ -24,7 +24,7 @@ new_Flashback_code/data/checkins-4sq.txt
 
 new_Flashback_code/KGE/gowalla_scheme1_transh_loc_temporal_20.pkl
 
-将user_loc_graph.zip放到根目录的KGE文件夹下解压，目录如下：
+**将user_loc_graph.zip放到根目录的KGE文件夹下解压，目录如下：**
 new_Flashback_code/KGE/gowalla_scheme2_transe_user-loc_50.pkl
 
 # Model Training

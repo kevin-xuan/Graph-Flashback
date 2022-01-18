@@ -306,8 +306,8 @@ class Flashback(nn.Module):
         # interact = self.interact_graph.to(x.device)  # (user_count, input_size)
         # user_interact = torch.sparse.mm(interact, encoder_weight)  # (user_count, hidden_size)
         # user_p = torch.index_select(user_interact, 0, active_user.squeeze())  # (user_len, hidden_size)
-        # out_w = out_w * x_emb
-        out_w = out_w + x_emb
+#         out_w = out_w * x_emb
+#         out_w = out_w + x_emb
         out_pu = torch.zeros(seq_len, user_len, 2 *
                              self.hidden_size, device=x.device)
         for i in range(seq_len):

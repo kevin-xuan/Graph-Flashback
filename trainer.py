@@ -1,11 +1,3 @@
-'''
-Descripttion: 
-version: 
-Author: Paulzzzhang
-Date: 2022-01-08 22:44:10
-LastEditors: Paulzzzhang
-LastEditTime: 2022-01-09 12:59:40
-'''
 import time
 
 import torch

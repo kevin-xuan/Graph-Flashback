@@ -34,10 +34,10 @@ https://drive.google.com/file/d/14l-LzoD-T3y3SAP_GU05SKAeGob6uZrX/view?usp=shari
  -->
 <!-- new_Flashback_code/KGE/gowalla_scheme2_transe_user-loc_50.pkl -->
 
-# Model Training
+<!-- # Model Training
 进入submit文件夹，然后运行run.sh文件
 ```
 sh run.sh
-```
+``` -->
  -->
 

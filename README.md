@@ -12,6 +12,7 @@
 # Data Preparation
 
 https://drive.google.com/file/d/1QXdpp0_QesJo7NZdhvoafg4MlpI_Bx-O/view?usp=sharing
+
 将flashback_data.zip放到根目录的data文件夹下解压后得到2个txt文件, 目录如下:
 
 new_Flashback_code/data/checkins-gowalla.txt

@@ -35,7 +35,7 @@ https://drive.google.com/file/d/14l-LzoD-T3y3SAP_GU05SKAeGob6uZrX/view?usp=shari
 
 **将user_loc_graph.tar放到根目录的KGE文件夹下解压，目录如下：**
 
-new_Flashback_code/KGE/gowalla_scheme2_transe_user-loc_50.pkl -->
+new_Flashback_code/KGE/gowalla_scheme2_transe_user-loc_50.pkl
 
 # Model Training
 进入submit文件夹，然后运行run.sh文件

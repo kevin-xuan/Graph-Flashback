@@ -68,7 +68,7 @@ class Setting:
         parser.add_argument('--hidden-dim', default=10, type=int, help='hidden dimensions to use')
         parser.add_argument('--weight_decay', default=0, type=float, help='weight decay regularization')
         parser.add_argument('--lr', default=0.01, type=float, help='learning rate')  # 0.01
-        parser.add_argument('--epochs', default=50, type=int, help='amount of epochs')  # 100
+        parser.add_argument('--epochs', default=100, type=int, help='amount of epochs')  # 100
         parser.add_argument('--rnn', default='rnn', type=str, help='the GRU implementation to use: [rnn|gru|lstm]')
 
         # data management

@@ -36,8 +36,13 @@ Graph_Flashback/KGE/gowalla_scheme1_transh_loc_temporal_20.pkl -->
 Graph_Flashback/KGE/gowalla_scheme2_transe_user-loc_50.pkl-->
 
 # Model Training
-进入submit文件夹，然后运行run.sh文件
+
+Gowalla
 ```
-sh run.sh
+python train.py --trans_loc_file KGE/gowalla_scheme2_transe_loc_temporal_100.pkl --trans_interact_file KGE/gowalla_scheme2_transe_user-loc_100.pkl
 ```
 
+Foursquare
+```
+python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/foursquare_scheme2_transe_user-loc_20.pkl
+```

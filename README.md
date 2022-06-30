@@ -1,5 +1,5 @@
 # Graph-Flashback Network for Next Location Recommendation
-![image](https://github.com/kevin-xuan/Graph-Flashback/data/framework.png)
+![image](data/framework.png)
 # Requirements
 ```
 pip install -r requirements.txt

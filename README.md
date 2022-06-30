@@ -1,13 +1,9 @@
 # Graph-Flashback_code Updating....
 
 # Requirements
-* torch 1.10
-
-* numpy
-
-* pickle
-
-* tqdm
+```
+pip install -r requirements.txt
+```
 
 # Data Preparation
 

@@ -46,3 +46,5 @@ Foursquare
 ```
 python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/foursquare_scheme2_transe_user-loc_20.pkl
 ```
+<!-- ### Citing FOGS
+If you use our method as baseline, please kindly cite our IJCAI 2022 paper the using following BibTeX entry. -->

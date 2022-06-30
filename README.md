@@ -15,7 +15,8 @@ Graph_Flashback/data/checkins-gowalla.txt
 
 Graph_Flashback/data/checkins-4sq.txt
 
-https://drive.google.com/file/d/1ST6GQidWVlR6yQle38MfPUSUc29t9xIT/view?usp=sharing
+<!-- https://drive.google.com/file/d/1ST6GQidWVlR6yQle38MfPUSUc29t9xIT/view?usp=sharing -->
+https://drive.google.com/file/d/12N9-UXPYrd4BhIlnh1B60RoV3HL5VGeJ/view?usp=sharing
 
 **再将POI_graph.zip放到根目录的KGE文件夹下解压后得到多个graph.pkl文件，目录如下：**
 

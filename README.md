@@ -1,4 +1,4 @@
-# Graph-Flashback Network for Next Location Recommendation
+# SIGKDD 2022. Graph-Flashback Network for Next Location Recommendation
 ![image](data/framework.PNG)
 # Requirements
 ```

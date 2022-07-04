@@ -7,18 +7,15 @@ pip install -r requirements.txt
 
 # Data Preparation
 
-[flashback_data.zip](https://drive.google.com/file/d/1QXdpp0_QesJo7NZdhvoafg4MlpI_Bx-O/view?usp=sharing)
-
-**将flashback_data.zip放到根目录的data文件夹下解压后得到2个txt文件, 目录如下:**
+**将[flashback_data.zip](https://drive.google.com/file/d/1QXdpp0_QesJo7NZdhvoafg4MlpI_Bx-O/view?usp=sharing)放到根目录的data文件夹下解压后得到2个txt文件, 目录如下:**
 
 Graph_Flashback/data/checkins-gowalla.txt
 
 Graph_Flashback/data/checkins-4sq.txt
 
 <!-- https://drive.google.com/file/d/1ST6GQidWVlR6yQle38MfPUSUc29t9xIT/view?usp=sharing -->
-https://drive.google.com/file/d/12N9-UXPYrd4BhIlnh1B60RoV3HL5VGeJ/view?usp=sharing
 
-**再将POI_graph.zip放到根目录的KGE文件夹下解压后得到多个graph.pkl文件，目录如下：**
+**再将[POI_graph.zip](https://drive.google.com/file/d/12N9-UXPYrd4BhIlnh1B60RoV3HL5VGeJ/view?usp=sharing)放到根目录的KGE文件夹下解压后得到多个graph.pkl文件，目录如下：**
 
 Graph_Flashback/KGE/gowalla_scheme2_transe_loc_temporal_100.pkl
 

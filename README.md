@@ -43,5 +43,19 @@ Foursquare
 ```
 python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/foursquare_scheme2_transe_user-loc_20.pkl
 ```
-<!-- ### Citing FOGS
-If you use our method as baseline, please kindly cite our IJCAI 2022 paper the using following BibTeX entry. -->
+# Citing
+If you use Graph-Flashback in your research, please cite the following [paper] (https://dl.acm.org/doi/10.1145/3534678.3539383):
+```
+@inproceedings{DBLP:conf/kdd/RaoCLSYH22,
+  author    = {Xuan Rao and
+               Lisi Chen and
+               Yong Liu and
+               Shuo Shang and
+               Bin Yao and
+               Peng Han},
+  title     = {Graph-Flashback Network for Next Location Recommendation},
+  booktitle = {{KDD} '22: The 28th {ACM} {SIGKDD} Conference on Knowledge Discovery
+               and Data Mining, Washington, DC, USA, August 14 - 18, 2022},
+  year      = {2022}
+}
+```

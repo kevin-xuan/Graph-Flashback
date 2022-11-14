@@ -7,7 +7,7 @@ pip install -r requirements.txt
 
 # Data Preparation
 
-**将[flashback_data.zip](https://drive.google.com/file/d/1QXdpp0_QesJo7NZdhvoafg4MlpI_Bx-O/view?usp=sharing)放到根目录的data文件夹下解压后得到2个txt文件, 目录如下:**
+**place [flashback_data.zip](https://drive.google.com/file/d/1QXdpp0_QesJo7NZdhvoafg4MlpI_Bx-O/view?usp=sharing) into Graph_Flashback/data/ and unzip the file as following:**
 
 Graph_Flashback/data/checkins-gowalla.txt
 
@@ -15,9 +15,13 @@ Graph_Flashback/data/checkins-4sq.txt
 
 <!-- https://drive.google.com/file/d/1ST6GQidWVlR6yQle38MfPUSUc29t9xIT/view?usp=sharing -->
 
-**再将[POI_graph.zip](https://drive.google.com/file/d/12N9-UXPYrd4BhIlnh1B60RoV3HL5VGeJ/view?usp=sharing)放到根目录的KGE文件夹下解压后得到多个graph.pkl文件，目录如下：**
+**place [POI_graph.zip](https://drive.google.com/file/d/12N9-UXPYrd4BhIlnh1B60RoV3HL5VGeJ/view?usp=sharing) into Graph_Flashback/KGE/ and unzip the file as following :**
 
 Graph_Flashback/KGE/gowalla_scheme2_transe_loc_temporal_100.pkl
+
+**Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided.** 
+
+**Also, you can download the user profile file by the link presented in Section 6 "EXPERIMENTS" in our paper.**
 
 <!-- 再将poi_graph.zip放到根目录的KGE文件夹下解压后得到36个graph.pkl文件，目录如下：
 

@@ -19,7 +19,7 @@ Graph_Flashback/data/checkins-4sq.txt
 
 Graph_Flashback/KGE/gowalla_scheme2_transe_loc_temporal_100.pkl
 
-**Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided.**
+**Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided.** Also, you can download the friendfile by the link presented in our paper.
 
 <!-- 再将poi_graph.zip放到根目录的KGE文件夹下解压后得到36个graph.pkl文件，目录如下：
 

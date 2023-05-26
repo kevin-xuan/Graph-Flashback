@@ -48,8 +48,21 @@ Foursquare
 python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/foursquare_scheme2_transe_user-loc_20.pkl
 ```
 # Constructing new datasets
-In order to train your model on your own datasets, you should run [generate_triplet.py](https://github.com/kevin-xuan/Graph-Flashback/blob/380d7bf98f7996d72ab126e1339d5078b8b5a7e3/KGE/generate_triplet.py#L237) by modifying some default settings such as dataset_file and [refine.py](https://github.com/kevin-xuan/Graph-Flashback/blob/380d7bf98f7996d72ab126e1339d5078b8b5a7e3/KGE/refine.py#L5) to extract triplets files.
-Moreover, we provide the **KGE** code by the [link](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011), and you should move the extracted files into the corresponding dir, e.g., './data/gowalla/'. Finally, using your pre-trained model to construct the location graph by the [construct_loc_loc_graph.py](https://github.com/kevin-xuan/Graph-Flashback/blob/3d5d42bbd50e39d797564a3aa880232ffcaccdb5/KGE/construct_loc_loc_graph.py#L162).
+In order to train your model on your own datasets, you should run "generate_triplet.py" by modifying some default settings such as **dataset_file** and **DATA_NAME**=<your_dataset_name> in this [line](https://github.com/kevin-xuan/Graph-Flashback/blob/a1f18b793f22af3b62f212030fafd8c5f5624699/KGE/constant.py#LL1C40-L1C40) and "refine.py" to extract the final triplets files as follows:
+
+```
+cd KGE
+python generate_triplet.py --dataset <your_dataset>.txt --friendship <your_friend>.txt 
+python refine.py
+```
+
+Moreover, we provide the **KGE** code by the [link](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011), and you should copy the directory **scheme2** (i.e., './KGE/gowalla/scheme2/') into the corresponding dir in KGE code, e.g., './data/gowalla/'. Finally, using your pre-trained model to construct the location graph by the [construct_loc_loc_graph.py](https://github.com/kevin-xuan/Graph-Flashback/blob/3d5d42bbd50e39d797564a3aa880232ffcaccdb5/KGE/construct_loc_loc_graph.py#L162), for example,
+
+```
+cd KGE
+python construct_loc_loc_graph.py --model_type transe --dataset <your_data_name> --pretrain_model <your_pretrained_model> --version scheme2 --threshold 10 --user_count 10000 --loc_count 10000 
+```
+
 
 # Citing
 If you use Graph-Flashback in your research, please cite the following [paper](https://dl.acm.org/doi/10.1145/3534678.3539383):

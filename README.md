@@ -19,7 +19,7 @@ Graph_Flashback/data/checkins-4sq.txt
 
 Graph_Flashback/KGE/gowalla_scheme2_transe_loc_temporal_100.pkl
 
-**3. Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided. (If you are interested in the code of pre-trained model, you can find the download link [here](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011)) (including processed triplets)**. Otherwise, we also provide the code for training your models on your own datasets [here](https://github.com/kevin-xuan/KGE), which needs to construct your triplets files. See Section [Constructing new datasets](#Constructing new datasets) for details.
+**3. Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided. (If you are interested in the code of pre-trained model, you can find the download link [here](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011)) (including processed triplets)**. Otherwise, we also provide the code for training your models on your own datasets [here](https://github.com/kevin-xuan/KGE), which needs to construct your triplets files. See Section [Constructing new datasets](##Constructing new datasets) for details.
 
 **4. The friend datasets have been uploaded into the [data file](https://github.com/kevin-xuan/Graph-Flashback/tree/main/data). You can also download the user profile file by the link presented in Section 6 "EXPERIMENTS" in our paper.**
 

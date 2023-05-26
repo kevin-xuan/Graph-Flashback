@@ -56,7 +56,7 @@ python generate_triplet.py --dataset <your_dataset>.txt --friendship <your_frien
 python refine.py
 ```
 
-Moreover, we provide the **KGE** code by the [link](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011), and you should copy the directory **scheme2** (i.e., './KGE/gowalla/scheme2/') into the corresponding dir in KGE code, e.g., './data/gowalla/'. Finally, using your pre-trained model to construct the location graph by the [construct_loc_loc_graph.py](https://github.com/kevin-xuan/Graph-Flashback/blob/3d5d42bbd50e39d797564a3aa880232ffcaccdb5/KGE/construct_loc_loc_graph.py#L162), for example,
+Moreover, we provide the **KGE** code by the [link](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011), and you should **delete** the two original txt files: "final_test_triplets.txt" and "final_train_triplets.txt" and **rename** the "new_final_test_triplets.txt" into "final_test_triplets.txt", so do "new_final_train_triplets.txt", and copy the directory **scheme2** (i.e., './KGE/gowalla/scheme2/') into the corresponding dir in KGE code, e.g., './data/gowalla/'. Finally, using your pre-trained model to construct the location graph by the [construct_loc_loc_graph.py](https://github.com/kevin-xuan/Graph-Flashback/blob/3d5d42bbd50e39d797564a3aa880232ffcaccdb5/KGE/construct_loc_loc_graph.py#L162), for example,
 
 ```
 cd KGE

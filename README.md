@@ -19,7 +19,7 @@ Graph_Flashback/data/checkins-4sq.txt
 
 Graph_Flashback/KGE/gowalla_scheme2_transe_loc_temporal_100.pkl
 
-**3. Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided. (If you are interested in the code of pre-trained model, you can find the download link [here](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011)) (including processed triplets files)**. Otherwise, we also provide the pure source code for training your models on your own datasets [here](https://github.com/kevin-xuan/KGE), which needs to construct your triplets files. See Section [Constructing new datasets](#Constructing-new-datasets) for details.
+**3. Moreover, the [pre-trained models](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided. (If you are interested in the code of pre-trained model, you can find the download link [here](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011)) (including processed triplets files)**. Otherwise, we also provide the pure source code for training your models on your own datasets [here](https://github.com/kevin-xuan/KGE), which needs to construct your triplets files. See Section [Training new datasets](#Training-new-datasets) for details.
 
 **4. The friend datasets have been uploaded into the [data file](https://github.com/kevin-xuan/Graph-Flashback/tree/main/data). You can also download the user profile file by the link presented in Section 6 "EXPERIMENTS" in our paper.**
 
@@ -47,7 +47,7 @@ Foursquare
 ```
 python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/foursquare_scheme2_transe_user-loc_20.pkl
 ```
-# Constructing new datasets
+# Training new datasets
 In order to train your model on your own datasets, you should run "generate_triplet.py" by modifying some default settings such as **dataset_file** and **DATA_NAME**=<your_dataset_name> in this [line](https://github.com/kevin-xuan/Graph-Flashback/blob/a1f18b793f22af3b62f212030fafd8c5f5624699/KGE/constant.py#LL1C40-L1C40) and "refine.py" to extract the final triplets files as follows:
 
 ```
@@ -70,7 +70,7 @@ Finally, using your pre-trained model to construct the location graph by the [co
 cd KGE
 python construct_loc_loc_graph.py --model_type transe --dataset <your_data_name> --pretrain_model <your_pretrained_model> --version scheme2 --threshold 10 --user_count 10000 --loc_count 10000 
 ```
-
+As for training the corresponding Graph-Flashback model, please refer to [Model Training](#model-training).
 
 # Citing
 If you use Graph-Flashback in your research, please cite the following [paper](https://dl.acm.org/doi/10.1145/3534678.3539383):

@@ -10,6 +10,7 @@ from dataloader import PoiDataloader
 from math import radians, cos, sin, asin, sqrt
 from tqdm import tqdm
 from collections import defaultdict
+from constant import DATA_NAME
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -250,8 +251,7 @@ if __name__ == '__main__':
     user2id = poi_loader.user2id
     poi2id = poi_loader.poi2id
     poi2gps = poi_loader.poi2gps
-    DATA_NAME = gowalla # foursquare or your_data_name
-    data_path = './dataset/{}'.formar(DATA_NAME)
+    data_path = './dataset/{}'.format(DATA_NAME)
     users_count = len(users)
     # generate train & test file
 

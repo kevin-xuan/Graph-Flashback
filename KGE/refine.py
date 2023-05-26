@@ -2,8 +2,9 @@
 # 因此需要将训练集中的两种关系以8:2划分,并保留原先的数据文件
 
 if __name__ == '__main__':
-    new_train_triplets = './dataset/gowalla/new_version_scheme1/new_final_train_triplets.txt'
-    new_test_triplets = './dataset/gowalla/new_version_scheme1/new_final_test_triplets.txt'
+    DATA_NAME = gowalla # foursqre or your_data_name
+    new_train_triplets = './dataset/{}/new_final_train_triplets.txt'.format(DATA_NAME)
+    new_test_triplets = './dataset/{}/new_final_test_triplets.txt'.format(DATA_NAME)
     f_new_train = open(new_train_triplets, 'w+')
     f_new_test = open(new_test_triplets, 'w+')
 
@@ -12,7 +13,7 @@ if __name__ == '__main__':
     ratio = 0.8
 
     # 原封不动地把interact和temporal三元组写入新文件中
-    with open('./dataset/gowalla/new_version_scheme1/final_test_triplets.txt', 'r') as f_test:
+    with open('./dataset/{}/final_test_triplets.txt'.format(DATA_NAME), 'r') as f_test:
         for line in f_test.readlines():
             tokens = tuple(line.strip('\n').split('\t'))
             h, t, r = tokens  # str
@@ -20,7 +21,7 @@ if __name__ == '__main__':
             f_new_test.write(t + '\t')
             f_new_test.write(r + '\n')
 
-    with open('./dataset/gowalla/new_version_scheme1/final_train_triplets.txt', 'r') as f_train:
+    with open('./dataset/{}/final_train_triplets.txt', 'r').format(DATA_NAME) as f_train:
         for line in f_train.readlines():
             tokens = tuple(line.strip('\n').split('\t'))
             h, t, r = tokens  # str

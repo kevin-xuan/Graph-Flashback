@@ -236,7 +236,7 @@ if __name__ == '__main__':
     user2id = poi_loader.user2id
     poi2id = poi_loader.poi2id
     poi2gps = poi_loader.poi2gps
-    data_path = './dataset/{}/scheme_{}'.format(DATA_NAME, SCHEME)
+    data_path = './dataset/{}/{}_scheme{}'.format(DATA_NAME, DATA_NAME, SCHEME)
     if not os.path.exists(data_path):
         os.makedirs(data_path)
     users_count = len(users)

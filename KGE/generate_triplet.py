@@ -250,7 +250,8 @@ if __name__ == '__main__':
     user2id = poi_loader.user2id
     poi2id = poi_loader.poi2id
     poi2gps = poi_loader.poi2gps
-    data_path = './dataset/foursquare'
+    DATA_NAME = gowalla # foursquare or your_data_name
+    data_path = './dataset/{}'.formar(DATA_NAME)
     users_count = len(users)
     # generate train & test file
 

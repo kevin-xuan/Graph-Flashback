@@ -3,8 +3,8 @@
 from constant import DATA_NAME, SCHEME
 
 if __name__ == '__main__':
-    new_train_triplets = './dataset/{}/scheme_{}/new_final_train_triplets.txt'.format(DATA_NAME, SCHEME)
-    new_test_triplets = './dataset/{}/scheme_{}/new_final_test_triplets.txt'.format(DATA_NAME, SCHEME)
+    new_train_triplets = './dataset/{}/{}_scheme{}/new_final_train_triplets.txt'.format(DATA_NAME, DATA_NAME, SCHEME)
+    new_test_triplets = './dataset/{}/{}_scheme{}/new_final_test_triplets.txt'.format(DATA_NAME, DATA_NAME, SCHEME)
     f_new_train = open(new_train_triplets, 'w+')
     f_new_test = open(new_test_triplets, 'w+')
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     ratio = 0.8
 
     # 原封不动地把interact和temporal三元组写入新文件中
-    with open('./dataset/{}/scheme_{}/final_test_triplets.txt'.format(DATA_NAME, SCHEME), 'r') as f_test:
+    with open('./dataset/{}/{}_scheme{}/final_test_triplets.txt'.format(DATA_NAME, DATA_NAME, SCHEME), 'r') as f_test:
         for line in f_test.readlines():
             tokens = tuple(line.strip('\n').split('\t'))
             h, t, r = tokens  # str

@@ -1,8 +1,8 @@
 # 因为final_train_triplets.txt包含了所有friend以及spatial关系,造成final_test_triplets.txt里没有这两种关系.
 # 因此需要将训练集中的两种关系以8:2划分,并保留原先的数据文件
+from constant import DATA_NAME
 
 if __name__ == '__main__':
-    DATA_NAME = gowalla # foursqre or your_data_name
     new_train_triplets = './dataset/{}/new_final_train_triplets.txt'.format(DATA_NAME)
     new_test_triplets = './dataset/{}/new_final_test_triplets.txt'.format(DATA_NAME)
     f_new_train = open(new_train_triplets, 'w+')

@@ -57,7 +57,7 @@ python refine.py
 ```
 
 Moreover, we provide the **KGE** code by the [link](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011), and you should **delete** the two original txt files: "final_test_triplets.txt" and "final_train_triplets.txt" and **rename** the "new_final_test_triplets.txt" into "final_test_triplets.txt", so do "new_final_train_triplets.txt", and copy the directory **scheme2** (i.e., './KGE/gowalla/scheme2/') into the corresponding dir in KGE code, e.g., './datasets/gowalla/kg/'. 
-The "relation2id.txt" is provided and used in same way, and the corresponding file name mapping is as follows:
+The **"relation2id.txt"** is provided and used in same way, and the corresponding file name mapping is as follows:
 ```
 entity2id.txt -> e_map.txt
 final_train_triplets.txt -> train.txt

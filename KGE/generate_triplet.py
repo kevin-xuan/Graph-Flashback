@@ -10,7 +10,7 @@ from dataloader import PoiDataloader
 from math import radians, cos, sin, asin, sqrt
 from tqdm import tqdm
 from collections import defaultdict
-from constant import DATA_NAME
+from constant import DATA_NAME, SCHEME
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -106,78 +106,63 @@ def generate_train_test_triplets(train_file, train_triplets_file, friendship_fil
         pois_list.append((poi, coord))
 
     # 方案1
-    # lambda_d = 0.2  # 距离阈值为0.2千米
-    # with tqdm(total=len(pois_list)) as bar:
-    #     for i in range(len(pois_list)):
-    #         for j in range(i+1, len(pois_list)):
-    #             poi_prev, coord_prev = pois_list[i]
-    #             poi_next, coord_next = pois_list[j]
-    #
-    #             poi_prev = poi_prev + users_count  # poi在entity中所对应的实体集
-    #             poi_next = poi_next + users_count
-    #             lat_prev, lon_prev = coord_prev
-    #             lat_next, lon_next = coord_next
-    #
-    #             dist = haversine(lat_prev, lon_prev, lat_next, lon_next)
-    #             if dist <= lambda_d:
-    #                 f_train_triplets.write(str(poi_prev) + '\t')
-    #                 f_train_triplets.write(str(poi_next) + '\t')
-    #                 f_train_triplets.write('2' + '\n')  # 2代表spatial relation
-    #                 # spatial relation是对称的
-    #                 f_train_triplets.write(str(poi_next) + '\t')
-    #                 f_train_triplets.write(str(poi_prev) + '\t')
-    #                 f_train_triplets.write('2' + '\n')
-    #
-    #         bar.update(1)
+    if SCHEME == 1:
+        lambda_d = 0.2  # 距离阈值为0.2千米
+        with tqdm(total=len(pois_list)) as bar:
+            for i in range(len(pois_list)):
+                for j in range(i+1, len(pois_list)):
+                    poi_prev, coord_prev = pois_list[i]
+                    poi_next, coord_next = pois_list[j]
+        
+                    poi_prev = poi_prev + users_count  # poi在entity中所对应的实体集
+                    poi_next = poi_next + users_count
+                    lat_prev, lon_prev = coord_prev
+                    lat_next, lon_next = coord_next
+        
+                    dist = haversine(lat_prev, lon_prev, lat_next, lon_next)
+                    if dist <= lambda_d:
+                        f_train_triplets.write(str(poi_prev) + '\t')
+                        f_train_triplets.write(str(poi_next) + '\t')
+                        f_train_triplets.write('2' + '\n')  # 2代表spatial relation
+                        # spatial relation是对称的
+                        f_train_triplets.write(str(poi_next) + '\t')
+                        f_train_triplets.write(str(poi_prev) + '\t')
+                        f_train_triplets.write('2' + '\n')
+        
+                bar.update(1)
 
     # 方案2
-    lambda_d = 3  # 距离阈值为3千米, 再取top k, 即双重限制
-    with tqdm(total=len(pois_list)) as bar:
-        for i in range(len(pois_list)):
-            loci_list = []
-            for j in range(len(pois_list)):
-                poi_prev, coord_prev = pois_list[i]
-                poi_next, coord_next = pois_list[j]
+    else:
+        lambda_d = 3  # 距离阈值为3千米, 再取top k, 即双重限制
+        with tqdm(total=len(pois_list)) as bar:
+            for i in range(len(pois_list)):
+                loci_list = []
+                for j in range(len(pois_list)):
+                    poi_prev, coord_prev = pois_list[i]
+                    poi_next, coord_next = pois_list[j]
 
-                poi_prev = poi_prev + users_count  # poi在entity中所对应的实体集
-                poi_next = poi_next + users_count
-                lat_prev, lon_prev = coord_prev
-                lat_next, lon_next = coord_next
+                    poi_prev = poi_prev + users_count  # poi在entity中所对应的实体集
+                    poi_next = poi_next + users_count
+                    lat_prev, lon_prev = coord_prev
+                    lat_next, lon_next = coord_next
 
-                dist = haversine(lat_prev, lon_prev, lat_next, lon_next)
-                if dist <= lambda_d and poi_prev != poi_next:
-                    loci_list.append((poi_next, dist))  # 先是第一重限制, 这样可能会造成很多重复计算
+                    dist = haversine(lat_prev, lon_prev, lat_next, lon_next)
+                    if dist <= lambda_d and poi_prev != poi_next:
+                        loci_list.append((poi_next, dist))  # 先是第一重限制, 这样可能会造成很多重复计算
 
-            sort_list = sorted(loci_list, key=lambda x: x[1])  # 从小到大排序,距离越小,排名越靠前
-            length = min(len(sort_list), 50)
-            select_pois = sort_list[:length]  # 一般情况下, sort_list的长度肯定不止50, 取top 50  这是第二重限制
-            for poi_entity, _ in select_pois:
-                f_train_triplets.write(str(poi_prev) + '\t')
-                f_train_triplets.write(str(poi_entity) + '\t')
-                f_train_triplets.write('2' + '\n')  # 2代表spatial relation
-                # spatial relation是对称的
-                f_train_triplets.write(str(poi_entity) + '\t')
-                f_train_triplets.write(str(poi_prev) + '\t')
-                f_train_triplets.write('2' + '\n')
+                sort_list = sorted(loci_list, key=lambda x: x[1])  # 从小到大排序,距离越小,排名越靠前
+                length = min(len(sort_list), 50)
+                select_pois = sort_list[:length]  # 一般情况下, sort_list的长度肯定不止50, 取top 50  这是第二重限制
+                for poi_entity, _ in select_pois:
+                    f_train_triplets.write(str(poi_prev) + '\t')
+                    f_train_triplets.write(str(poi_entity) + '\t')
+                    f_train_triplets.write('2' + '\n')  # 2代表spatial relation
+                    # spatial relation是对称的
+                    f_train_triplets.write(str(poi_entity) + '\t')
+                    f_train_triplets.write(str(poi_prev) + '\t')
+                    f_train_triplets.write('2' + '\n')
 
-            bar.update(1)
-
-    # lambda_d = 0.2  # 距离阈值为2千米
-    # for j in range(len(poi_ids)):
-    #     for k in range(j + 1, len(poi_ids)):
-    #         lat_j, lon_j = poi2gps[int(poi_ids[j])]
-    #         lat_k, lon_k = poi2gps[int(poi_ids[k])]
-    #         dist = haversine(lat_j, lon_j, lat_k, lon_k)
-    #         poi_prev = str(int(poi_ids[j]) + users_count)
-    #         poi_next = str(int(poi_ids[k]) + users_count)
-    #         if dist <= lambda_d and poi_prev != poi_next:
-    #             f_train_triplets.write(poi_prev + '\t')
-    #             f_train_triplets.write(poi_next + '\t')
-    #             f_train_triplets.write('2' + '\n')  # 2代表spatial relation
-    #             # spatial relation是对称的
-    #             f_train_triplets.write(poi_next + '\t')
-    #             f_train_triplets.write(poi_prev + '\t')
-    #             f_train_triplets.write('2' + '\n')
+                bar.update(1)
 
     # 构建friend关系  互为朋友的user相连  这个train/test会重复构造一次,可以选择生成一个friend_triplet文件,然后再将其内容放入train/test
     # 但因为数量很少,构造很快,所以放在一起
@@ -251,7 +236,9 @@ if __name__ == '__main__':
     user2id = poi_loader.user2id
     poi2id = poi_loader.poi2id
     poi2gps = poi_loader.poi2gps
-    data_path = './dataset/{}'.format(DATA_NAME)
+    data_path = './dataset/{}/scheme_{}'.format(DATA_NAME, SCHEME)
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
     users_count = len(users)
     # generate train & test file
 

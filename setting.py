@@ -86,13 +86,13 @@ class Setting:
         parser.add_argument('--log_file', default='./data/log_', type=str,
                             help='存储结果日志')
         parser.add_argument('--trans_loc_file', default='./KGE/gowalla_scheme2_transe_loc_temporal_100.pkl', type=str,
-                            help='使用transh方法构造的时间POI转换图')
+                            help='使用transe方法构造的时间POI转换图')
         parser.add_argument('--trans_user_file', default='', type=str,
-                            help='使用transh方法构造的user转换图')
+                            help='使用transe方法构造的user转换图')
         parser.add_argument('--trans_loc_spatial_file', default='', type=str,
-                            help='使用transh方法构造的空间POI转换图')
+                            help='使用transe方法构造的空间POI转换图')
         parser.add_argument('--trans_interact_file', default='./KGE/gowalla_scheme1_transh_user-loc_100.pkl', type=str,
-                            help='使用transh方法构造的空间POI转换图')
+                            help='使用transe方法构造的用户-POI交互图')
         parser.add_argument('--use_weight', default=False, type=bool, help='应用于GCN的AXW中是否使用W')
         parser.add_argument('--use_graph_user', default=False, type=bool, help='是否使用user graph')
         parser.add_argument('--use_spatial_graph', default=False, type=bool, help='是否使用空间POI graph')

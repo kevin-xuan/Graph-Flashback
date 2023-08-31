@@ -47,7 +47,7 @@ class RnnFactory():
 
     def create(self, hidden_size):
         if self.rnn_type == Rnn.RNN:
-            return nn.RNN(hidden_size, hidden_size)  # 因为拼接了time embedding
+            return nn.RNN(hidden_size, hidden_size) 
         if self.rnn_type == Rnn.GRU:
             return nn.GRU(hidden_size, hidden_size)
         if self.rnn_type == Rnn.LSTM:
@@ -79,9 +79,6 @@ class Flashback(nn.Module):
             calculate_random_walk_matrix((graph * self.lambda_loc + self.I).astype(np.float32)))
 
         self.spatial_graph = spatial_graph
-        # self.I_f = identity(friend_graph.shape[0], format='coo')
-        # self.friend_graph = calculate_random_walk_matrix(
-        #     (self.lambda_user * friend_graph + self.I_f).astype(np.float32)).tocsr()
         if interact_graph is not None:
             self.interact_graph = sparse_matrix_to_tensor(calculate_random_walk_matrix(
                 interact_graph))  # (M, N)
@@ -97,11 +94,10 @@ class Flashback(nn.Module):
         self.fc = nn.Linear(2 * hidden_size, input_size)
 
     def forward(self, x, t, t_slot, s, y_t, y_t_slot, y_s, h, active_user):
-        # 用GCN处理转移graph, 即用顶点i的邻居顶点j来更新i所对应的POI embedding
         seq_len, user_len = x.size()
         x_emb = self.encoder(x)
 
-        是否用GCN来更新user embedding
+        # 是否用GCN来更新user embedding
         if self.use_graph_user:
             # I_f = identity(self.friend_graph.shape[0], format='coo')
             # friend_graph = (self.friend_graph * self.lambda_user + I_f).astype(np.float32)

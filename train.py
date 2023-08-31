@@ -23,7 +23,6 @@ Main train script to invoke from commandline.
 setting = Setting()
 setting.parse()
 log = open(setting.log_file, 'w')
-# log_string(log, setting)
 
 print(setting)
 
@@ -62,13 +61,13 @@ assert setting.batch_size < poi_loader.user_count(
 ), 'batch size must be lower than the amount of available users'
 
 # create flashback trainer
-with open(setting.trans_loc_file, 'rb') as f:  # 时间POI graph
+with open(setting.trans_loc_file, 'rb') as f:  # transition POI graph
     transition_graph = pickle.load(f)  # 在cpu上
 # transition_graph = top_transition_graph(transition_graph)
 transition_graph = coo_matrix(transition_graph)
 
 if setting.use_spatial_graph:
-    with open(setting.trans_loc_spatial_file, 'rb') as f:  # 空间POI graph
+    with open(setting.trans_loc_spatial_file, 'rb') as f:  # spatial POI graph
         spatial_graph = pickle.load(f)  # 在cpu上
     # spatial_graph = top_transition_graph(spatial_graph)
     spatial_graph = coo_matrix(spatial_graph)
@@ -83,12 +82,10 @@ if setting.use_graph_user:
 else:
     friend_graph = None
 
-with open(setting.trans_interact_file, 'rb') as f:  # 空间POI graph
+with open(setting.trans_interact_file, 'rb') as f:  # User-POI interaction graph
     interact_graph = pickle.load(f)  # 在cpu上
 interact_graph = csr_matrix(interact_graph)
 
-# print('已经归一化转移矩阵')
-# log_string(log, '已经归一化转移矩阵')
 log_string(log, 'Successfully load graph')
 
 trainer = FlashbackTrainer(setting.lambda_t, setting.lambda_s, setting.lambda_loc, setting.lambda_user,
@@ -140,18 +137,11 @@ for e in range(setting.epochs):  # 100
         active_users = active_users.to(setting.device)
 
         optimizer.zero_grad()
-        forward_start = time.time()
         loss = trainer.loss(x, t, t_slot, s, y, y_t,
                             y_t_slot, y_s, h, active_users)
 
-        # print('One forward: ', time.time() - forward_start)
-
-        start = time.time()
         loss.backward(retain_graph=True)
-
         # torch.nn.utils.clip_grad_norm_(trainer.parameters(), 5)
-        end = time.time()
-        # print('反向传播需要{}s'.format(end - start))
         losses.append(loss.item())
         optimizer.step()
 
@@ -164,22 +154,15 @@ for e in range(setting.epochs):  # 100
     # statistics:
     if (e + 1) % 1 == 0:
         epoch_loss = np.mean(losses)
-        # print(f'Epoch: {e + 1}/{setting.epochs}')
-        # print(f'Used learning rate: {scheduler.get_last_lr()[0]}')
-        # print(f'Avg Loss: {epoch_loss}')
         log_string(log, f'Epoch: {e + 1}/{setting.epochs}')
         log_string(log, f'Used learning rate: {scheduler.get_last_lr()[0]}')
         log_string(log, f'Avg Loss: {epoch_loss}')
 
-    # if (e + 1) >= 21:  # 第25轮效果最好, 直接评估这一轮  (e + 1) % setting.validate_epoch == 0 or
-    # if (e + 1) == 23 or (e + 1) == 43:
     if (e + 1) % setting.validate_epoch == 0:
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
-        # print(f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         evl_start = time.time()
         evaluation_test.evaluate()
         evl_end = time.time()
-        # print('评估需要{:.2f}'.format(evl_end - evl_start))
         log_string(log, 'One evaluate need {:.2f}s'.format(
             evl_end - evl_start))
 

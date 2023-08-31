@@ -1,5 +1,6 @@
 
 __pycache__/
 
-# ommit datasets
-# data/*.txt
+data/checkins-*.txt
+KGE/POI_graph
+KGE/*.pkl

@@ -62,15 +62,6 @@ class FlashbackTrainer():
         out, h = self.model(x, t, t_slot, s, y_t,
                             y_t_slot, y_s, h, active_users)
 
-        # seq_len, user_len, loc_count = out.shape
-        # out = out.view(-1, self.loc_count)  # (seq_len * batch_size, loc_count)
-        # out = out.t()  # (loc_count, seq_len * batch_size)
-        # graph = sparse_matrix_to_tensor(self.graph).to(x.device)  # (loc_count, loc_count)
-        # graph = graph.t()
-        # out = torch.sparse.mm(graph, out)  # (loc_count, seq_len * batch_size)
-        # out = out.t()  # (seq_len * batch_size, loc_count)
-        # out = torch.reshape(out, (seq_len, user_len, loc_count))
-
         out_t = out.transpose(0, 1)
         return out_t, h  # model outputs logits
 
@@ -85,5 +76,4 @@ class FlashbackTrainer():
 
         y = y.view(-1)  # (seq_len * batch_size)
         l = self.cross_entropy_loss(out, y)
-        # print(l.item())
         return l

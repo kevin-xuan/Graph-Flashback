@@ -24,20 +24,23 @@ setting = Setting()
 setting.parse()
 log = open(setting.log_file, 'w')
 
-print(setting)
+# print(setting)
 
-log_string(log, 'log_file: ' + setting.log_file)
-log_string(log, 'user_file: ' + setting.trans_user_file)
-log_string(log, 'loc_temporal_file: ' + setting.trans_loc_file)
-log_string(log, 'loc_spatial_file: ' + setting.trans_loc_spatial_file)
-log_string(log, 'interact_file: ' + setting.trans_interact_file)
+# log_string(log, 'log_file: ' + setting.log_file)
+# log_string(log, 'user_file: ' + setting.trans_user_file)
+# log_string(log, 'loc_temporal_file: ' + setting.trans_loc_file)
+# log_string(log, 'loc_spatial_file: ' + setting.trans_loc_spatial_file)
+# log_string(log, 'interact_file: ' + setting.trans_interact_file)
 
-log_string(log, str(setting.lambda_user))
-log_string(log, str(setting.lambda_loc))
+# log_string(log, str(setting.lambda_user))
+# log_string(log, str(setting.lambda_loc))
 
-log_string(log, 'W in AXW: ' + str(setting.use_weight))
-log_string(log, 'GCN in user: ' + str(setting.use_graph_user))
-log_string(log, 'spatial graph: ' + str(setting.use_spatial_graph))
+# log_string(log, 'W in AXW: ' + str(setting.use_weight))
+# log_string(log, 'GCN in user: ' + str(setting.use_graph_user))
+# log_string(log, 'spatial graph: ' + str(setting.use_spatial_graph))
+
+message = ''.join([f'{k}: {v}\n' for k, v in vars(setting).items()])
+log_string(log, message)
 
 # load dataset
 poi_loader = PoiDataloader(

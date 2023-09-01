@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-import time
+import time, os
 import pickle
 from setting import Setting
 from trainer import FlashbackTrainer
@@ -22,6 +22,9 @@ Main train script to invoke from commandline.
 
 setting = Setting()
 setting.parse()
+dir_name = os.path.dirname(setting.log_file)
+if not os.path.exists(dir_name):
+    os.mkdir(dir_name)
 log = open(setting.log_file, 'w')
 
 # print(setting)

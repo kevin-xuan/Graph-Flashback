@@ -25,6 +25,8 @@ setting.parse()
 dir_name = os.path.dirname(setting.log_file)
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
+timestring = time.strftime('%Y%m%d%H%M%S', time.localtime())
+setting.log_file = setting.log_file + '_' + timestring
 log = open(setting.log_file, 'w')
 
 # print(setting)

@@ -72,6 +72,9 @@ python construct_loc_loc_graph.py --model_type transe --dataset <your_data_name>
 ```
 As for training the corresponding Graph-Flashback model, please refer to [Model Training](#model-training) or (see **scripts/run.sh**) .
 
+# Acknowledgements
+- [Flashback](https://github.com/eXascaleInfolab/Flashback_code) The model architecture of Graph-Flashback follows Flashback.
+- [joint-kg-recommender](https://github.com/TaoMiner/joint-kg-recommender) The used Knowledge Graph Embedding ([KGE](https://github.com/kevin-xuan/KGE)) method to obtain the pretrained model follows joint-kg-recommender.
 # Citing
 If you use Graph-Flashback in your research, please cite the following [paper](https://dl.acm.org/doi/10.1145/3534678.3539383):
 ```

@@ -33,6 +33,13 @@ class FlashbackTrainer():
     def __str__(self):
         return 'Use flashback training.'
 
+    def count_parameters(self):
+        param_count = 0
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                param_count += param.numel()
+        return param_count
+    
     def parameters(self):
         return self.model.parameters()
 

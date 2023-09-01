@@ -193,7 +193,6 @@ def log_string(log, string):
     log.flush()
     print(string)
 
-
 if __name__ == '__main__':
     graph_path = 'data/user_similarity_graph.pkl'
     user_similarity_matrix = torch.tensor(load_graph_data(pkl_filename=graph_path))

@@ -13,13 +13,16 @@ from evaluation import Evaluation
 from tqdm import tqdm
 from scipy.sparse import coo_matrix
 
-'''
-Main train script to invoke from commandline.
-'''
+def print_model(log, model):
+    param_count = 0
+    log_string(log, 'Trainable parameter list:')
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            # print(name, param.shape, param.numel())
+            param_count += param.numel()
+    log_string(log, f'In total: {param_count} trainable parameters.')
 
 # parse settings
-
-
 setting = Setting()
 setting.parse()
 dir_name = os.path.dirname(setting.log_file)
@@ -112,6 +115,9 @@ optimizer = torch.optim.Adam(trainer.parameters(
 ), lr=setting.learning_rate, weight_decay=setting.weight_decay)
 scheduler = torch.optim.lr_scheduler.MultiStepLR(
     optimizer, milestones=[20, 40, 60, 80], gamma=0.2)
+
+param_count = trainer.count_parameters()
+log_string(log, f'In total: {param_count} trainable parameters')
 
 bar = tqdm(total=setting.epochs)
 bar.set_description('Training')

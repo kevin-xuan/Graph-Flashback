@@ -64,7 +64,7 @@ class Setting:
 
     def parse_arguments(self, parser):
         # training
-        parser.add_argument('--gpu', default=0, type=int, help='the gpu to use')  # -1
+        parser.add_argument('--gpu', default=1, type=int, help='the gpu to use')  # -1
         parser.add_argument('--hidden-dim', default=10, type=int, help='hidden dimensions to use')
         parser.add_argument('--weight_decay', default=0, type=float, help='weight decay regularization')
         parser.add_argument('--lr', default=0.01, type=float, help='learning rate')  # 0.01
@@ -83,7 +83,7 @@ class Setting:
                             help='report every x user on evaluation (-1: ignore)')
 
         # log
-        parser.add_argument('--log_file', default='./data/log_', type=str,
+        parser.add_argument('--log_file', default='./result/log_gowalla', type=str,
                             help='存储结果日志')
         parser.add_argument('--trans_loc_file', default='./KGE/gowalla_scheme2_transe_loc_temporal_100.pkl', type=str,
                             help='使用transe方法构造的时间POI转换图')
@@ -91,7 +91,7 @@ class Setting:
                             help='使用transe方法构造的user转换图')
         parser.add_argument('--trans_loc_spatial_file', default='', type=str,
                             help='使用transe方法构造的空间POI转换图')
-        parser.add_argument('--trans_interact_file', default='./KGE/gowalla_scheme1_transh_user-loc_100.pkl', type=str,
+        parser.add_argument('--trans_interact_file', default='./KGE/gowalla_scheme2_transe_user-loc_100.pkl', type=str,
                             help='使用transe方法构造的用户-POI交互图')
         parser.add_argument('--use_weight', default=False, type=bool, help='应用于GCN的AXW中是否使用W')
         parser.add_argument('--use_graph_user', default=False, type=bool, help='是否使用user graph')
@@ -108,8 +108,8 @@ class Setting:
 
     def parse_foursquare(self, parser):
         # defaults for foursquare dataset
-        parser.add_argument('--batch-size', default=1024, type=int,
-                            help='amount of users to process in one pass (batching)')
+        parser.add_argument('--batch-size', default=512, type=int,
+                            help='amount of users to process in one pass (batching)')  # 1024
         parser.add_argument('--lambda_t', default=0.1, type=float, help='decay factor for temporal data')
         parser.add_argument('--lambda_s', default=100, type=float, help='decay factor for spatial data')
         parser.add_argument('--lambda_loc', default=1.0, type=float, help='weight factor for transition graph')

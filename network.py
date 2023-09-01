@@ -145,7 +145,7 @@ class Flashback(nn.Module):
             temp_x = torch.index_select(encoder_weight, 0, x[i])
             new_x_emb.append(temp_x)
 
-        x_emb = torch.stack(new_x_emb, dim=0)
+        x_emb = torch.stack(new_x_emb, dim=0)  
 
         # user-poi
         loc_emb = self.encoder(torch.LongTensor(

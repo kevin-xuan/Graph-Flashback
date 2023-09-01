@@ -187,8 +187,10 @@ def main():
             graph_type = graph_type + '_temporal'
     else:
         graph_type = 'user'
-
-    graph_file = './' + args.dataset + '_' + args.version + '_' + args.model_type + '_' + graph_type + '_' + str(
+    prefix = 'POI_graph'
+    if not os.path.exists('./' + prefix):
+        os.mkdir('./' + prefix)
+    graph_file = './' + prefix + '/' + args.dataset + '_' + args.version + '_' + args.model_type + '_' + graph_type + '_' + str(
         args.threshold) + '.pkl'
 
     print(graph_file)

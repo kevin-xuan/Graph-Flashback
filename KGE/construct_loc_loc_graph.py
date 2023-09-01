@@ -160,10 +160,7 @@ def get_parser():
     parser = argparse.ArgumentParser(description='arguments')
     parser.add_argument("--model_type", default="transr", type=str, help="使用哪种KGE方法")
     parser.add_argument("--dataset", default="foursquare", type=str, help="使用哪种数据集")
-    # parser.add_argument("--pretrain_model", default="../data/foursquare_scheme2/foursquare-transe-1641035874.ckpt", type=str,help="加载模型")
-    # parser.add_argument("--pretrain_model", default="../data/foursquare_scheme2/foursquare-transh-1641218308.ckpt", type=str, help="加载模型")
-    parser.add_argument("--pretrain_model", default="../data/foursquare_scheme1/foursquare-transr-1641218589.ckpt", type=str, help="加载模型")
-    # parser.add_argument("--pretrain_model", default="../data/foursquare_scheme2/foursquare-transr-1641218308.ckpt",type=str, help="加载模型")
+    parser.add_argument("--pretrain_model", default="../data/pretrained-model/foursquare_scheme1/foursquare-transr-1641218589.ckpt", type=str, help="加载模型")
     parser.add_argument("--version", default="scheme1", type=str, help="使用哪种版本的KG")
     parser.add_argument("--threshold", default=20, type=int, help="构造稀疏转移graph")
     parser.add_argument("--user_count", default=45343, type=int, help="用户数目")  # 7768    45343

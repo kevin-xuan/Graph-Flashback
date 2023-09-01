@@ -158,7 +158,8 @@ for e in range(setting.epochs):  # 100
         log_string(log, f'Used learning rate: {scheduler.get_last_lr()[0]}')
         log_string(log, f'Avg Loss: {epoch_loss}')
 
-    if (e + 1) % setting.validate_epoch == 0:
+    # if (e + 1) % setting.validate_epoch == 0:
+    if (e + 1) > 20 and (e + 1) <= 27:
         log_string(log, f'~~~ Test Set Evaluation (Epoch: {e + 1}) ~~~')
         evl_start = time.time()
         evaluation_test.evaluate()

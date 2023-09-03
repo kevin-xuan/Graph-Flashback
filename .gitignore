@@ -3,5 +3,5 @@ __pycache__/
 
 data/checkins-*.txt
 data/pretrained-model
-KGE/POI_graph
+KGE/Graphs
 results

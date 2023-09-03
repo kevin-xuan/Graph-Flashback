@@ -15,9 +15,9 @@ Graph_Flashback/data/checkins-4sq.txt
 
 <!-- https://drive.google.com/file/d/1ST6GQidWVlR6yQle38MfPUSUc29t9xIT/view?usp=sharing -->
 
-**2. place [POI_graph.zip](https://drive.google.com/file/d/12N9-UXPYrd4BhIlnh1B60RoV3HL5VGeJ/view?usp=sharing) into Graph_Flashback/KGE/ and unzip the file as following :**
+**2. place [Graphs.zip](https://drive.google.com/file/d/1KC361Gq-K-0Aw7xu5pyl51YOgMK9JtMb/view?usp=sharing) into Graph_Flashback/KGE/ and unzip the file as following :**
 
-Graph_Flashback/KGE/POI_graph/gowalla_scheme2_transe_loc_temporal_100.pkl
+Graph_Flashback/KGE/Graphs/gowalla_scheme2_transe_loc_temporal_100.pkl
 
 **3. Optional, the [pretrained-model](https://drive.google.com/file/d/1oUXQjtnDrUnmdhVSGY64WrXBngzD1qhz/view?usp=sharing) are also provided, you can unzip the file into "data/" (e.g., Graph_Flashback/data/pretrained-model/gowalla_schema2) and use "scripts/construct_graphs.sh" for generating the graphs in this paper. (If you are interested in the code of pre-trained model, you can find the download link [here](https://github.com/kevin-xuan/Graph-Flashback/issues/1#issuecomment-1235372011)) (including processed triplets files)**. Otherwise, we also provide the pure source code for training your models on your own datasets [here](https://github.com/kevin-xuan/KGE), which needs to construct your triplets files. See Section [Training new datasets](#Training-new-datasets) for details.
 
@@ -40,12 +40,12 @@ Graph_Flashback/KGE/gowalla_scheme2_transe_user-loc_50.pkl-->
 
 Gowalla
 ```
-python train.py --trans_loc_file KGE/POI_graph/gowalla_scheme2_transe_loc_temporal_100.pkl --trans_interact_file KGE/POI_graph/gowalla_scheme2_transe_user-loc_100.pkl --log_file results/log_gowalla
+python train.py --trans_loc_file KGE/Graphs/gowalla_scheme2_transe_loc_temporal_100.pkl --trans_interact_file KGE/Graphs/gowalla_scheme2_transe_user-loc_100.pkl --log_file results/log_gowalla
 ```
 
 Foursquare
 ```
-python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/POI_graph/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/POI_graph/foursquare_scheme2_transe_user-loc_100.pkl --log_file results/log_foursquare
+python train.py --dataset checkins-4sq.txt --trans_loc_file KGE/Graphs/foursquare_scheme2_transe_loc_temporal_20.pkl --trans_interact_file KGE/Graph/foursquare_scheme2_transe_user-loc_100.pkl --log_file results/log_foursquare
 ```
 # Training new datasets
 In order to train your model on your own datasets, you should run "generate_triplet.py" by modifying some default settings such as **dataset_file** and **DATA_NAME**=<your_dataset_name> in this [line](https://github.com/kevin-xuan/Graph-Flashback/blob/a1f18b793f22af3b62f212030fafd8c5f5624699/KGE/constant.py#LL1C40-L1C40) and "refine.py" to extract the final triplets files as follows:

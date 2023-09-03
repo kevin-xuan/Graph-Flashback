@@ -2,7 +2,6 @@
 __pycache__/
 
 data/checkins-*.txt
-data/*_scheme*
+data/pretrained-model
 KGE/POI_graph
-KGE/Learned_Graphs
 results

@@ -17,7 +17,7 @@ def projection_transH(original, norm):
     return original - torch.sum(original * norm, dim=len(original.size()) - 1, keepdim=True) * norm
 
 
-def projection_transR(original, proj_matrix):  # (batch, k_dim)   (batch, k_dim * dim) k_dim可以与dim相同
+def projection_transR(original, proj_matrix):  # (batch, k_dim)   (batch, k_dim * dim) 
     ent_embedding_size = original.shape[1]
     rel_embedding_size = proj_matrix.shape[1] // ent_embedding_size
     original = original.view(-1, ent_embedding_size, 1)  # (batch, k_dim, 1)
@@ -90,7 +90,7 @@ def construct_transition_graph(args, filename, loc_encoder, temporal_preference,
     bar = tqdm(total=loc_count)
     bar.set_description('Construct Transition Graph')
 
-    transition_graph = lil_matrix((loc_count, loc_count), dtype=np.float32)  # 有向图
+    transition_graph = lil_matrix((loc_count, loc_count), dtype=np.float32)  # directed graph
     for i in range(loc_count):
         h_e = loc_encoder(torch.LongTensor([i]).to(device))
         t_list = list(range(loc_count))
@@ -101,7 +101,7 @@ def construct_transition_graph(args, filename, loc_encoder, temporal_preference,
         transition_vector = calculate_score(h_e, t_e, temporal_preference, model_type, L1_flag, norm, proj)
         transition_vector_a = torch.index_select(transition_vector, 0, indices)  # [0, 1, ..., i-1, i+1, i+2, ...]
 
-        indices = torch.argsort(transition_vector_a, descending=True)[:threshold]  # 选top_k
+        indices = torch.argsort(transition_vector_a, descending=True)[:threshold]  # top_k
         norm = torch.max(transition_vector_a[indices])
         for index in indices:
             index = index.item()
@@ -128,7 +128,7 @@ def construct_interact_graph(args, user_encoder, loc_encoder, interact_preferenc
 
     bar = tqdm(total=user_count)
     bar.set_description('Construct Interact Graph')
-    transition_graph = lil_matrix((user_count, user_count), dtype=np.float32)  # 有向图
+    transition_graph = lil_matrix((user_count, user_count), dtype=np.float32)  
 
     for i in range(user_count):
         h_e = loc_encoder(torch.LongTensor([i]).to(device))
@@ -140,7 +140,7 @@ def construct_interact_graph(args, user_encoder, loc_encoder, interact_preferenc
         transition_vector = another_calculate_score(h_e, t_e, interact_preference, model_type, L1_flag, norm, proj)
         transition_vector_a = torch.index_select(transition_vector, 0, indices)  # [0, 1, ..., i-1, i+1, i+2, ...]
 
-        indices = torch.argsort(transition_vector_a, descending=True)[:threshold]  # 选top_k
+        indices = torch.argsort(transition_vector_a, descending=True)[:threshold]  # top_k
         norm = torch.max(transition_vector_a[indices])
         for index in indices:
             index = index.item()
@@ -158,16 +158,16 @@ def construct_interact_graph(args, user_encoder, loc_encoder, interact_preferenc
 
 def get_parser():
     parser = argparse.ArgumentParser(description='arguments')
-    parser.add_argument("--model_type", default="transr", type=str, help="使用哪种KGE方法")
-    parser.add_argument("--dataset", default="foursquare", type=str, help="使用哪种数据集")
-    parser.add_argument("--pretrain_model", default="../data/pretrained-model/foursquare_scheme1/foursquare-transr-1641218589.ckpt", type=str, help="加载模型")
-    parser.add_argument("--version", default="scheme1", type=str, help="使用哪种版本的KG")
-    parser.add_argument("--threshold", default=20, type=int, help="构造稀疏转移graph")
-    parser.add_argument("--user_count", default=45343, type=int, help="用户数目")  # 7768    45343
-    parser.add_argument("--loc_count", default=68879, type=int, help="POI数目")  # 106994  68879
-    parser.add_argument("--L1_flag", default=True, type=bool, help="使用L1范数")
-    parser.add_argument("--loc_graph", default=True, type=bool, help="构造POI graph")
-    parser.add_argument("--loc_spatial", default=False, type=bool, help="构造spatial POI graph")
+    parser.add_argument("--model_type", default="transr", type=str, help="which KGE method to use")
+    parser.add_argument("--dataset", default="foursquare", type=str, help="which dataset to use")
+    parser.add_argument("--pretrain_model", default="../data/pretrained-model/foursquare_scheme1/foursquare-transr-1641218589.ckpt", type=str, help="pretrained model")
+    parser.add_argument("--version", default="scheme1", type=str, help="which version of KG")
+    parser.add_argument("--threshold", default=20, type=int, help="top_K")
+    parser.add_argument("--user_count", default=45343, type=int, help="number of user")  # gowalla: 7768    foursquare: 45343
+    parser.add_argument("--loc_count", default=68879, type=int, help="number of POI")  # gowalla: 106994 foursquare: 68879
+    parser.add_argument("--L1_flag", default=True, type=bool, help="whether to use L1 or L2 norm")
+    parser.add_argument("--loc_graph", default=True, type=bool, help="whether to construct POI or user graph")
+    parser.add_argument("--loc_spatial", default=False, type=bool, help="whether to construct temporal or spatial POI graph")
     args = parser.parse_args()
     return args
 
